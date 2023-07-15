@@ -1,0 +1,13 @@
+{
+  "folders": [
+	{
+		"name": "langchain",
+		"path": "../../../../../Downloads/langchain"
+	},
+	{
+		"name": "Factiverse",
+		"path": "../.."
+	}
+],
+  "settings": {}
+}
