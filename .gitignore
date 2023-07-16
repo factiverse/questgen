@@ -43,3 +43,13 @@ pydevd*.log
 nodeLanguageServer/**
 nodeLanguageServer.*/**
 dist/**
+QuestionGeneration/T5/runs
+QuestionGeneration/T5/t5-base-finetuned-xsum
+QuestionGeneration/T5/t5-larg-finetuned-xsum
+QuestionGeneration/T5/t5-large-finetuned-xsum
+QuestionGeneration/T5/t5-small-finetuned-xsum
+QuestionGeneration/T5/trained_model
+QuestionGeneration/T5/wandb
+QuestionGeneration/T5/cache_dir
+QuestionGeneration/T5/data
+QuestionGeneration/T5/flan-t5-base-finetuned-xsum
