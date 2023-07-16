@@ -53,3 +53,8 @@ QuestionGeneration/T5/wandb
 QuestionGeneration/T5/cache_dir
 QuestionGeneration/T5/data
 QuestionGeneration/T5/flan-t5-base-finetuned-xsum
+QuestionGeneration/cache_dir
+QuestionGeneration/outputs
+QuestionGeneration/runs
+QuestionGeneration/t5-small-finetuned-xsum
+QuestionGeneration/.langchain
