@@ -1,8 +1,0 @@
-IP-Address: 
-Port: 22
-You should use your public/private key pair to connect to the server
-
-Host gcpgpu
-HostName 34.91.195.94
-  User ritvik
-  IdentityFile ~/.ssh/id_rsa
