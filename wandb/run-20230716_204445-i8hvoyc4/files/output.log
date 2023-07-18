@@ -1,0 +1,14 @@
+Found cached dataset json (/home/ritvik/.cache/huggingface/datasets/json/default-73090ac240390b78/0.0.0/8bb11242116d547c741b2e8a1f18598ffdd40a1d4f2a2872c7a28b697434bc96)
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00, 235.86it/s]
+Found cached dataset json (/home/ritvik/.cache/huggingface/datasets/json/default-be5be90bb1eb255e/0.0.0/8bb11242116d547c741b2e8a1f18598ffdd40a1d4f2a2872c7a28b697434bc96)
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00, 568.95it/s]
+Loading cached processed dataset at /home/ritvik/.cache/huggingface/datasets/json/default-73090ac240390b78/0.0.0/8bb11242116d547c741b2e8a1f18598ffdd40a1d4f2a2872c7a28b697434bc96/cache-6642c47a3dc9dd7b.arrow
+Loading cached processed dataset at /home/ritvik/.cache/huggingface/datasets/json/default-be5be90bb1eb255e/0.0.0/8bb11242116d547c741b2e8a1f18598ffdd40a1d4f2a2872c7a28b697434bc96/cache-4660c86c2aa322fe.arrow
+/home/ritvik/conda/envs/testing-reqs/lib/python3.9/site-packages/transformers/optimization.py:411: FutureWarning: This implementation of AdamW is deprecated and will be removed in a future version. Use the PyTorch implementation torch.optim.AdamW instead, or set `no_deprecation_warning=True` to disable this warning
+  warnings.warn(
+  0%|                                                                                                                                      | 0/1 [00:00<?, ?it/s]You're using a T5TokenizerFast tokenizer. Please note that with a fast tokenizer, using the `__call__` method is faster than using a method to encode the text followed by a call to the `pad` method to get a padded encoding.
+/home/ritvik/conda/envs/testing-reqs/lib/python3.9/site-packages/torch/nn/parallel/_functions.py:68: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
+  warnings.warn('Was asked to gather along dimension 0, but all '
+100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:10<00:00, 10.07s/it]
+{'eval_loss': 3.95768666267395, 'eval_rouge1': 0.2462, 'eval_rouge2': 0.1106, 'eval_rougeL': 0.2164, 'eval_rougeLsum': 0.2147, 'eval_bleu': 0.0, 'eval_runtime': 1.4622, 'eval_samples_per_second': 10.942, 'eval_steps_per_second': 0.684, 'epoch': 1.0}
+{'train_runtime': 10.0888, 'train_samples_per_second': 3.172, 'train_steps_per_second': 0.099, 'train_loss': 4.4099225997924805, 'epoch': 1.0}

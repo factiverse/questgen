@@ -22,6 +22,6 @@ repos:
     hooks:
     -   id: pytest
         name: run tests
-        entry: pytest --timeout=60
+        entry: pytest
         language: system
         pass_filenames: false

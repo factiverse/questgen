@@ -1,0 +1,49 @@
+Found cached dataset json (/home/ritvik/.cache/huggingface/datasets/json/default-73090ac240390b78/0.0.0/8bb11242116d547c741b2e8a1f18598ffdd40a1d4f2a2872c7a28b697434bc96)
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00, 257.89it/s]
+Found cached dataset json (/home/ritvik/.cache/huggingface/datasets/json/default-be5be90bb1eb255e/0.0.0/8bb11242116d547c741b2e8a1f18598ffdd40a1d4f2a2872c7a28b697434bc96)
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00, 584.49it/s]
+/home/ritvik/conda/envs/testing-reqs/lib/python3.9/site-packages/transformers/optimization.py:411: FutureWarning: This implementation of AdamW is deprecated and will be removed in a future version. Use the PyTorch implementation torch.optim.AdamW instead, or set `no_deprecation_warning=True` to disable this warning
+  warnings.warn(
+  0%|                                                                                                                                     | 0/32 [00:00<?, ?it/s]You're using a T5TokenizerFast tokenizer. Please note that with a fast tokenizer, using the `__call__` method is faster than using a method to encode the text followed by a call to the `pad` method to get a padded encoding.
+/home/ritvik/conda/envs/testing-reqs/lib/python3.9/site-packages/torch/nn/parallel/_functions.py:68: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
+  warnings.warn('Was asked to gather along dimension 0, but all '
+
+
+
+100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 32/32 [00:15<00:00,  4.15it/s]
+
+
+
+
+Traceback (most recent call last):███████████████████████████████████████████████████████████████████████████████████████████████| 32/32 [00:10<00:00,  3.03it/s]
+  File "/home/ritvik/questgen/src/QuestionGeneration/T5/Generate-Question-train.py", line 146, in <module>
+    trainer.train()
+  File "/home/ritvik/conda/envs/testing-reqs/lib/python3.9/site-packages/transformers/trainer.py", line 1645, in train
+    return inner_training_loop(
+  File "/home/ritvik/conda/envs/testing-reqs/lib/python3.9/site-packages/transformers/trainer.py", line 2035, in _inner_training_loop
+    self._maybe_log_save_evaluate(tr_loss, model, trial, epoch, ignore_keys_for_eval)
+  File "/home/ritvik/conda/envs/testing-reqs/lib/python3.9/site-packages/transformers/trainer.py", line 2321, in _maybe_log_save_evaluate
+    metrics = self.evaluate(ignore_keys=ignore_keys_for_eval)
+  File "/home/ritvik/conda/envs/testing-reqs/lib/python3.9/site-packages/transformers/trainer_seq2seq.py", line 159, in evaluate
+    return super().evaluate(eval_dataset, ignore_keys=ignore_keys, metric_key_prefix=metric_key_prefix)
+  File "/home/ritvik/conda/envs/testing-reqs/lib/python3.9/site-packages/transformers/trainer.py", line 3053, in evaluate
+    output = eval_loop(
+  File "/home/ritvik/conda/envs/testing-reqs/lib/python3.9/site-packages/transformers/trainer.py", line 3353, in evaluation_loop
+    metrics = self.compute_metrics(EvalPrediction(predictions=all_preds, label_ids=all_labels))
+  File "/home/ritvik/questgen/src/QuestionGeneration/T5/Generate-Question-train.py", line 54, in compute_metrics
+    metric_rouge = evaluate.load("rouge")
+  File "/home/ritvik/conda/envs/testing-reqs/lib/python3.9/site-packages/evaluate/loading.py", line 734, in load
+    evaluation_cls = import_main_class(evaluation_module.module_path)
+  File "/home/ritvik/conda/envs/testing-reqs/lib/python3.9/site-packages/evaluate/loading.py", line 77, in import_main_class
+    module = importlib.import_module(module_path)
+  File "/home/ritvik/conda/envs/testing-reqs/lib/python3.9/importlib/__init__.py", line 127, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "<frozen importlib._bootstrap>", line 1030, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1007, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 986, in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 680, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/home/ritvik/.cache/huggingface/modules/evaluate_modules/metrics/evaluate-metric--rouge/b01e0accf3bd6dd24839b769a5fda24e14995071570870922c71970b3a6ed886/rouge.py", line 17, in <module>
+    import absl  # Here to have a nice missing dependency error message early on
+ModuleNotFoundError: No module named 'absl'

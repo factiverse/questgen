@@ -1,3 +1,4 @@
+# template reqs
 attrs==22.2.0
 black==23.1.0
 certifi
@@ -23,3 +24,17 @@ ruff==0.0.252
 tomli==2.0.1
 typing_extensions==4.5.0
 virtualenv==20.19.0
+
+#Quest Gen specific reqs
+transformers>=4.30.2
+datasets>=2.12.0
+evaluate>=0.4.0
+numpy>=1.24.3
+pandas>=2.0.1
+torch>=2.0.1
+nltk>=3.8.1
+wandb>=0.15.3
+accelerate>=0.20.1
+absl-py>=1.4.0
+rouge>=1.0.1
+rouge-score>=0.1.2

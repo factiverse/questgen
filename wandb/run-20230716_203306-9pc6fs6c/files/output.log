@@ -1,0 +1,37 @@
+Downloading (…)okenizer_config.json: 100%|███████████████████████████████████████████████████████████████████████████████████| 2.32k/2.32k [00:00<00:00, 264kB/s]
+Downloading (…)ve/main/spiece.model: 100%|████████████████████████████████████████████████████████████████████████████████████| 792k/792k [00:00<00:00, 12.9MB/s]
+Downloading (…)/main/tokenizer.json: 100%|██████████████████████████████████████████████████████████████████████████████████| 1.39M/1.39M [00:00<00:00, 10.7MB/s]
+Found cached dataset json (/home/ritvik/.cache/huggingface/datasets/json/default-73090ac240390b78/0.0.0/8bb11242116d547c741b2e8a1f18598ffdd40a1d4f2a2872c7a28b697434bc96)
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00, 219.18it/s]
+Found cached dataset json (/home/ritvik/.cache/huggingface/datasets/json/default-be5be90bb1eb255e/0.0.0/8bb11242116d547c741b2e8a1f18598ffdd40a1d4f2a2872c7a28b697434bc96)
+100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00, 487.43it/s]
+
+
+
+
+
+Downloading (…)lve/main/config.json: 100%|███████████████████████████████████████████████████████████████████████████████████| 1.21k/1.21k [00:00<00:00, 148kB/s]
+Downloading model.safetensors: 100%|██████████████████████████████████████████████████████████████████████████████████████████| 242M/242M [00:02<00:00, 89.8MB/s]
+Downloading (…)neration_config.json: 100%|██████████████████████████████████████████████████████████████████████████████████████| 147/147 [00:00<00:00, 18.2kB/s]
+/home/ritvik/conda/envs/testing-reqs/lib/python3.9/site-packages/transformers/optimization.py:411: FutureWarning: This implementation of AdamW is deprecated and will be removed in a future version. Use the PyTorch implementation torch.optim.AdamW instead, or set `no_deprecation_warning=True` to disable this warning
+  warnings.warn(
+  0%|                                                                                                                                  | 0/47730 [00:00<?, ?it/s]You're using a T5TokenizerFast tokenizer. Please note that with a fast tokenizer, using the `__call__` method is faster than using a method to encode the text followed by a call to the `pad` method to get a padded encoding.
+/home/ritvik/conda/envs/testing-reqs/lib/python3.9/site-packages/torch/nn/parallel/_functions.py:68: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
+  warnings.warn('Was asked to gather along dimension 0, but all '
+
+
+
+
+
+
+
+
+
+  0%|▏                                                                                                                      | 90/47730 [00:29<3:01:55,  4.36it/s]Traceback (most recent call last):
+  File "/home/ritvik/questgen/src/QuestionGeneration/T5/Generate-Question-train.py", line 146, in <module>
+    trainer.train()
+  File "/home/ritvik/conda/envs/testing-reqs/lib/python3.9/site-packages/transformers/trainer.py", line 1645, in train
+    return inner_training_loop(
+  File "/home/ritvik/conda/envs/testing-reqs/lib/python3.9/site-packages/transformers/trainer.py", line 1940, in _inner_training_loop
+    if (
+KeyboardInterrupt
