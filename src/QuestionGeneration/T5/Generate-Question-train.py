@@ -14,24 +14,62 @@ import nltk  # type: ignore
 import numpy as np
 import wandb
 from pathlib import Path
+import yaml  # type: ignore
+import argparse
+import os
+import logging
+
+logging.basicConfig(
+    format="%(asctime)s %(levelname)-4s [%(name)s:%(lineno)d] - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+    level=logging.INFO,
+)
+
+logger = logging.getLogger(__name__)
+metrics: dict[str, bool] = {}
 
 
-def load_data(train_file: str, test_file: str) -> datasets.DatasetDict:
+def read_config_file(file_name: str) -> dict:
+    """Reads YAML config from a config file.
+
+    Args:
+        file_name: the location where the config file is stored
+
+    Returns:
+        the contents of the YAML file
+    """
+    with open(file_name, "r") as file:
+        config = yaml.safe_load(file)
+    return config
+
+
+def load_data(train_test_dir) -> datasets.DatasetDict:
     """Loads data from train and test json files.
 
     Args:
-        train_file (str): path to train data
-        test_file (str): path to test data
+        train_test_dir: path to train and test data
 
     Returns:
-        DatasetDict: train and test data
+        train and test data
     """
-    raw_dataset_train = datasets.load_dataset("json", data_files=train_file)
-    raw_dataset_test = datasets.load_dataset("json", data_files=test_file)
-    raw_dataset = raw_dataset_train
-    raw_dataset["train"] = raw_dataset["train"].select(range(0, 32))
-    raw_dataset["test"] = raw_dataset_test["train"].select(range(0, 16))
-    return raw_dataset
+    train_file = os.path.join(train_test_dir, "train.json")
+    test_file = os.path.join(train_test_dir, "test.json")
+    if os.path.exists(train_file) and os.path.exists(train_file):
+        raw_dataset_train = datasets.load_dataset("json", data_files=train_file)
+        raw_dataset_test = datasets.load_dataset("json", data_files=test_file)
+        raw_dataset = raw_dataset_train
+        raw_dataset["train"] = raw_dataset["train"].select(range(0, 32))
+        raw_dataset["test"] = raw_dataset_test["train"].select(range(0, 16))
+        return raw_dataset
+    else:
+        logger.error(
+            FileNotFoundError(
+                f"The directory {train_test_dir}\
+                               does not contain 'train.json' and \
+                               'test.json'"
+            ),
+            exc_info=True,
+        )
 
 
 def preprocess_function(
@@ -40,15 +78,15 @@ def preprocess_function(
     """Convert example to tokenized.
 
     Args:
-        examples (dict): data values which contain the keys input_text, prefix
+        examples: data values which contain the keys input_text, prefix
           and target_text.
-        max_input_length (int, optional): max length of the input string.
+        max_input_length: max length of the input string.
           Defaults to 512.
-        max_target_length (int, optional): max length of the output string.
+        max_target_length: max length of the output string.
           Defaults to 512.
 
     Returns:
-        dict: tokenized version of example
+        tokenized version of example
     """
     inputs = [
         pre + ": " + inp
@@ -74,14 +112,17 @@ def compute_metrics(eval_pred: EvalPrediction) -> dict:
     of rouge scores and 1 bleu score is returned.
 
     Args:
-        eval_pred (EvalPrediction):
-            evaluation results from the test dataset.
+        eval_pred: evaluation results from the test dataset.
+        rouge: if rouge should be used as a metric
+        bleu: if bleu should be used as a metric
 
     Returns:
-        dict: rouge and bleu scores
+        rouge and bleu scores if requested
     """
-    metric_rouge = evaluate.load("rouge")
-    metric_bleu = evaluate.load("bleu")
+    global metrics
+    rouge = metrics["rouge"]
+    bleu = metrics["bleu"]
+
     predictions, labels = eval_pred
     decoded_preds = tokenizer.batch_decode(
         predictions, skip_special_tokens=True
@@ -100,82 +141,80 @@ def compute_metrics(eval_pred: EvalPrediction) -> dict:
 
     # Note that other metrics may not have a `use_aggregator` parameter
     # and thus will return a list, computing a metric for each sentence.
-    result_rouge = metric_rouge.compute(
-        predictions=decoded_preds,
-        references=decoded_labels,
-        use_stemmer=True,
-        use_aggregator=True,
-    )
-    result_bleu = metric_bleu.compute(
-        predictions=decoded_preds, references=decoded_labels
-    )
-
-    # Add mean generated length
     prediction_lens = [
         np.count_nonzero(pred != tokenizer.pad_token_id) for pred in predictions
     ]
+    bleu_rouge_score = {}
 
-    result_rouge["gen_len"] = np.mean(prediction_lens)
-    result_bleu["gen_len"] = np.mean(prediction_lens)
+    if rouge:
+        metric_rouge = evaluate.load("rouge")
+        result_rouge = metric_rouge.compute(
+            predictions=decoded_preds,
+            references=decoded_labels,
+            use_stemmer=True,
+            use_aggregator=True,
+        )
 
-    # print(result_bleu, "\n",result_rouge)
-    bleu_rouge_score = {
-        "rouge1": result_rouge["rouge1"],
-        "rouge2": result_rouge["rouge2"],
-        "rougeL": result_rouge["rougeL"],
-        "rougeLsum": result_rouge["rougeLsum"],
-        "bleu": result_bleu["bleu"],
-    }
+        bleu_rouge_score["rouge1"] = result_rouge["rouge1"]
+        bleu_rouge_score["rouge2"] = result_rouge["rouge2"]
+        bleu_rouge_score["rougeL"] = result_rouge["rougeL"]
+        bleu_rouge_score["rougeLsum"] = result_rouge["rougeLsum"]
+
+    if bleu:
+        metric_bleu = evaluate.load("bleu")
+        result_bleu = metric_bleu.compute(
+            predictions=decoded_preds, references=decoded_labels
+        )
+        result_rouge["gen_len"] = np.mean(prediction_lens)
+        result_bleu["gen_len"] = np.mean(prediction_lens)
+        bleu_rouge_score["bleu"] = result_bleu["bleu"]
+
+    # Add mean generated length
     return {k: round(v, 4) for k, v in bleu_rouge_score.items()}
 
 
-def init_args(batch_size=8) -> Seq2SeqTrainingArguments:
+def init_args(
+    hyper_parameters: dict, output_dir: str, model_checkpoint: str
+) -> Seq2SeqTrainingArguments:
     """Initalize the hyperparameters for the model to be trained on.
 
     Args:
-        batch_size (int, optional): the batch size of the model. Defaults to 8.
+        hyper_parameters: hyperparameters from config
+        output_dir: where the model will be stored after training
+        model_checkpoint: name of the model we will finetune
 
     Returns:
-        Seq2SeqTrainingArguments: the hyperparameters of the model.
+        the hyperparameters of the model.
     """
-    args = Seq2SeqTrainingArguments(
-        output_dir=Path(wandb.run.dir) / "model",  # type: ignore
-        evaluation_strategy="epoch",
-        learning_rate=2e-5,
-        per_device_train_batch_size=batch_size,
-        per_device_eval_batch_size=batch_size,
-        weight_decay=0.01,
-        save_total_limit=3,
-        num_train_epochs=1,
-        predict_with_generate=True,
-        fp16=True,
-        overwrite_output_dir=True,
-    )
+    hyper_parameters["output_dir"] = Path(output_dir) / model_checkpoint
+    hyper_parameters["learning_rate"] = float(hyper_parameters["learning_rate"])
+    args = Seq2SeqTrainingArguments(**hyper_parameters)
     wandb.config.update(args.to_dict())
     return args
 
 
 def init_trainer(
-    args: Seq2SeqTrainingArguments,
+    train_args: Seq2SeqTrainingArguments,
     data_collator: DataCollatorForSeq2Seq,
     tokenized_datasets: datasets.DatasetDict,
+    tokenizer: T5TokenizerFast,
+    model: AutoModelForSeq2SeqLM,
 ) -> Seq2SeqTrainer:
     """Initalizes a Sequence to Sequence Trainer.
 
     Args:
-        args (Seq2SeqTrainingArguments):
-            training arguments such as hyper parameters for the trainer
-        data_collator (DataCollatorForSeq2Seq):
-            dynamically padded inputs and labels
-        tokenized_datasets (datasets.DatasetDict):
-            data that the model will train/test on
+        train_args: training arguments such as hyper-parameters for the trainer
+        data_collator: dynamically padded inputs and labels
+        tokenized_datasets: data that the model will train/test on
+        tokenizer: used to preprocess data
+        model: the model to train
 
     Returns:
-        Seq2SeqTrainer: training loop for model
+        training loop for model
     """
     return Seq2SeqTrainer(
         model,
-        args,
+        train_args,
         train_dataset=tokenized_datasets["train"],
         eval_dataset=tokenized_datasets["test"],
         data_collator=data_collator,
@@ -185,29 +224,36 @@ def init_trainer(
 
 
 if __name__ == "__main__":
-    model_checkpoint = "T5-small"
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--config",
+        help="location of a YAML config file",
+        default="src/QuestionGeneration/T5/config.yaml",
+    )
+    args = parser.parse_args()
+    options = vars(args)
+
+    config = read_config_file(options["config"])
+    metrics = config["metrics"]
+    model_checkpoint = config["model_checkpoint"]
     wandb_tags = ["query generation", "question generation"]
-    # Hi
-    # Hello
     wandb.init(
         tags=wandb_tags,
         project="question generation " + model_checkpoint.split("/")[-1],
     )
-    #     {
-    #         "tags": wandb_tags,
-    #         "project": "question generation " +
-    #  model_checkpoint.split("/")[-1],
-    #     }
-    # )
     tokenizer = T5TokenizerFast.from_pretrained(
         model_checkpoint, use_auth_token=True
     )
-    raw_dataset = load_data("data/final/train.json", "data/final/test.json")
+    raw_dataset = load_data(config["data"])
     tokenized_datasets = raw_dataset.map(preprocess_function, batched=True)
     model = AutoModelForSeq2SeqLM.from_pretrained(model_checkpoint)
-    args = init_args(batch_size=8)
+    args = init_args(
+        config["hyper parameters"], config["output_dir"], model_checkpoint
+    )
     data_collator = DataCollatorForSeq2Seq(tokenizer, model=model)
-    trainer = init_trainer(args, data_collator, tokenized_datasets)
+    trainer = init_trainer(
+        args, data_collator, tokenized_datasets, tokenizer, model
+    )
     trainer.train()
 
-# config.yaml file
+# # config.yaml file
