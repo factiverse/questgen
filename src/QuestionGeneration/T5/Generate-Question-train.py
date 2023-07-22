@@ -53,12 +53,13 @@ def load_data(train_test_dir) -> datasets.DatasetDict:
     """
     train_file = os.path.join(train_test_dir, "train.json")
     test_file = os.path.join(train_test_dir, "test.json")
+
     if os.path.exists(train_file) and os.path.exists(train_file):
         raw_dataset_train = datasets.load_dataset("json", data_files=train_file)
         raw_dataset_test = datasets.load_dataset("json", data_files=test_file)
         raw_dataset = raw_dataset_train
-        raw_dataset["train"] = raw_dataset["train"].select(range(0, 32))
-        raw_dataset["test"] = raw_dataset_test["train"].select(range(0, 16))
+        raw_dataset["train"] = raw_dataset["train"]
+        raw_dataset["test"] = raw_dataset_test["train"]
         return raw_dataset
     else:
         logger.error(
