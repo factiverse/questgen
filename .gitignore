@@ -60,4 +60,5 @@ src/QuestionGeneration/t5-small-finetuned-xsum
 src/QuestionGeneration/.langchain
 src/QuestionGeneration/model.py
 src/QuestionGeneration/openai.ipynb
+src/QuestionGeneration/models
 wandb

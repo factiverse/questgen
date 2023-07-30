@@ -248,7 +248,9 @@ if __name__ == "__main__":
     tokenized_datasets = raw_dataset.map(preprocess_function, batched=True)
     model = AutoModelForSeq2SeqLM.from_pretrained(model_checkpoint)
     args = init_args(
-        config["hyper parameters"], config["output_dir"], model_checkpoint
+        config["hyper parameters"],
+        config["output_dir"],
+        model_checkpoint.split("/")[-1],
     )
     data_collator = DataCollatorForSeq2Seq(tokenizer, model=model)
     trainer = init_trainer(

@@ -12,7 +12,7 @@ hyper parameters:
 
 data: data/final/
 output_dir: src/QuestionGeneration/models/
-model_checkpoint: "T5-small"
+model_checkpoint: "google/flan-t5-base"
 wandb_tags: ["query generation", "question generation"]
 
 metrics:
