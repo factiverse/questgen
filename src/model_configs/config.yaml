@@ -12,7 +12,7 @@ hyper parameters:
 
 data: data/online-claims
 output_dir: models/
-model_checkpoint: "google/flan-t5-base"
+model_checkpoint: "facebook/bart-large"
 wandb_tags: ["query generation", "question generation"]
 
 metrics:
