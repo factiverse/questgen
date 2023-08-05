@@ -11,8 +11,8 @@ hyper parameters:
   no_cuda: false
 
 data: data/online-claims
-output_dir: src/QuestionGeneration/models/
-model_checkpoint: "t5-small"
+output_dir: models/
+model_checkpoint: "facebook/bart-large"
 wandb_tags: ["query generation", "question generation"]
 
 metrics:

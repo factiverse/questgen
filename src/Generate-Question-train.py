@@ -186,7 +186,8 @@ def init_args(
     Returns:
         the hyperparameters of the model.
     """
-    hyper_parameters["output_dir"] = Path(output_dir) / model_checkpoint
+    model_out_dir = model_checkpoint + "_" + str(len(os.listdir(output_dir)))
+    hyper_parameters["output_dir"] = Path(output_dir) / model_out_dir
     hyper_parameters["learning_rate"] = float(hyper_parameters["learning_rate"])
     args = Seq2SeqTrainingArguments(**hyper_parameters)
     wandb.config.update(args.to_dict())
@@ -228,7 +229,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--config",
         help="location of a YAML config file",
-        default="src/QuestionGeneration/T5/config.yaml",
+        default="src/model_configs/config.yaml",
     )
     args = parser.parse_args()
     options = vars(args)
@@ -248,7 +249,9 @@ if __name__ == "__main__":
     tokenized_datasets = raw_dataset.map(preprocess_function, batched=True)
     model = AutoModelForSeq2SeqLM.from_pretrained(model_checkpoint)
     args = init_args(
-        config["hyper parameters"], config["output_dir"], model_checkpoint
+        config["hyper parameters"],
+        config["output_dir"],
+        model_checkpoint.split("/")[-1],
     )
     data_collator = DataCollatorForSeq2Seq(tokenizer, model=model)
     trainer = init_trainer(
