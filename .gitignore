@@ -45,4 +45,4 @@ nodeLanguageServer.*/**
 dist/**
 src/QuestionGeneration/
 wandb/
-models/
+models/*

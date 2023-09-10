@@ -245,6 +245,7 @@ if __name__ == "__main__":
         tags=wandb_tags,
         project="question generation " + model_checkpoint.split("/")[-1],
     )
+    print(model_checkpoint)
     tokenizer = T5TokenizerFast.from_pretrained(
         model_checkpoint, use_auth_token=True
     )

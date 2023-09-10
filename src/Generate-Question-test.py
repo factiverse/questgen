@@ -4,11 +4,14 @@ from transformers import (  # type: ignore
     AutoTokenizer,
     AutoModelForSeq2SeqLM,
     EvalPrediction,
+    Seq2SeqTrainer,
+    Seq2SeqTrainingArguments,
 )
 import yaml  # type: ignore
 import argparse
 import os
 import logging
+from pathlib import Path
 import typing
 import numpy as np
 import nltk  # type: ignore
@@ -58,6 +61,28 @@ def get_model_checkpoint_path(config: dict) -> str:
     return model_checkpoint
 
 
+def init_args(
+    hyper_parameters: typing.Dict[str, typing.Any],
+    output_dir: str,
+    model_checkpoint: str,
+) -> Seq2SeqTrainingArguments:
+    """Initalize the hyperparameters for the model to be trained on.
+
+    Args:
+        hyper_parameters: Hyperparameters from config.
+        output_dir: Where the model will be stored after training.
+        model_checkpoint: Name of the model we will finetune.
+
+    Returns:
+        The hyperparameters of the model.
+    """
+    model_out_dir = model_checkpoint + "_" + str(len(os.listdir(output_dir)))
+    hyper_parameters["output_dir"] = Path(output_dir) / model_out_dir
+    hyper_parameters["learning_rate"] = float(hyper_parameters["learning_rate"])
+    args = Seq2SeqTrainingArguments(**hyper_parameters)
+    return args
+
+
 def predict(
     to_predict: str, model: AutoModelForSeq2SeqLM, tokenizer: AutoTokenizer
 ) -> str:
@@ -93,6 +118,12 @@ def compute_metrics(eval_pred: EvalPrediction) -> typing.Dict[str, float]:
         Rouge and Bleu scores if requested.
     """
     global metrics
+
+    try:
+        nltk.data.find("tokenizers/punkt")
+    except LookupError:
+        nltk.download("punkt")
+
     rouge = metrics["rouge"]
     bleu = metrics["bleu"]
 
@@ -163,6 +194,7 @@ def load_data(test_dir: str) -> datasets.DatasetDict:
         raw_dataset_test = datasets.load_dataset("json", data_files=test_file)
         raw_dataset_test["test"] = raw_dataset_test["train"]
         del raw_dataset_test["train"]
+        # raw_dataset_test["test"].to(device)
         return raw_dataset_test
     else:
         logger.error(
@@ -226,7 +258,10 @@ def preprocess_data(
 
 
 def eval(
-    val_data_path: str, model: AutoModelForSeq2SeqLM, tokenizer: AutoTokenizer
+    val_data_path: str,
+    model: AutoModelForSeq2SeqLM,
+    tokenizer: AutoTokenizer,
+    args: Seq2SeqTrainingArguments,
 ) -> typing.Dict[str, float]:
     """Evaluate the Seq2Seq model.
 
@@ -235,25 +270,34 @@ def eval(
         model: The model to evaluate
         tokenizer: The string tokenizer.
             Converts strings to tokenized strings.
+        args: Testing Arguments
 
     Returns:
         The Rouge and Bleu scores of the model.
     """
     raw_dataset = load_data(val_data_path)
     tokenized_datasets = raw_dataset.map(preprocess_data, batched=True)
-    tokenized_datasets.to(device)
-    # input_ids = tokenizer(tokenized_datasets, return_tensors="pt")
-    # print(input_ids["input_ids"])
 
-    outputs = model.generate(
-        torch.tensor(tokenized_datasets["test"]["input_ids"])
+    trainer = Seq2SeqTrainer(
+        model,
+        args,
+        eval_dataset=tokenized_datasets["test"],
+        tokenizer=tokenizer,
+        compute_metrics=compute_metrics,
     )
-    model_gen = tokenizer.decode(outputs)
-    return model_gen
+    results = trainer.evaluate(tokenized_datasets["test"])
+
+    print(results)
+    # outputs = model.generate(
+    #     torch.tensor(tokenized_datasets["test"]["input_ids"],device=device)
+    # )
+    # model_gen = tokenizer.decode(outputs)
+    return results
 
 
 if __name__ == "__main__":
     device = "cuda" if torch.cuda.is_available() else "cpu"
+
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--config",
@@ -261,12 +305,20 @@ if __name__ == "__main__":
         default="src/model_configs/config.yaml",
     )
     args = parser.parse_args()
+
     options = vars(args)
 
     config = read_config_file(options["config"])
     metrics = config["metrics"]
 
     model_checkpoint = get_model_checkpoint_path(config)
+
+    args = init_args(
+        config["hyper parameters"],
+        config["output_dir"],
+        model_checkpoint.split("/")[-1],
+    )
+
     tokenizer = AutoTokenizer.from_pretrained(
         model_checkpoint, use_auth_token=True, device=device
     )
@@ -279,7 +331,7 @@ if __name__ == "__main__":
                  (q+enter to quit)"
     )
 
-    eval(config["data"], model, tokenizer)
+    eval(config["data"], model, tokenizer, args)
     # while True:
     #     inp = input()
     #     if inp == "q":
