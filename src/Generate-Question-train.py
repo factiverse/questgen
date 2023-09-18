@@ -65,8 +65,7 @@ def load_data(train_test_dir: str) -> datasets.DatasetDict:
         logger.error(
             FileNotFoundError(
                 f"The directory {train_test_dir}\
-                               does not contain 'train.json' and \
-                               'test.json'"
+                    does not contain 'train.json' and 'test.json'"
             ),
             exc_info=True,
         )
@@ -189,8 +188,8 @@ def init_args(
     Returns:
         The hyperparameters of the model.
     """
-    model_out_dir = model_checkpoint + "_" + str(len(os.listdir(output_dir)))
-    hyper_parameters["output_dir"] = Path(output_dir) / model_out_dir
+    print(output_dir)
+    hyper_parameters["output_dir"] = Path(output_dir)
     hyper_parameters["learning_rate"] = float(hyper_parameters["learning_rate"])
     args = Seq2SeqTrainingArguments(**hyper_parameters)
     wandb.config.update(args.to_dict())
@@ -240,27 +239,43 @@ if __name__ == "__main__":
     config = read_config_file(options["config"])
     metrics = config["metrics"]
     model_checkpoint = config["model_checkpoint"]
-    wandb_tags = ["query generation", "question generation"]
+    wandb_tags = [
+        "query generation",
+        "question generation",
+        model_checkpoint.split("/")[-1],
+        config["data"].split("/")[-1],
+    ]
     wandb.init(
         tags=wandb_tags,
         project="question generation " + model_checkpoint.split("/")[-1],
     )
-    print(model_checkpoint)
+    # print("*************************************************",model_checkpoint)
     tokenizer = T5TokenizerFast.from_pretrained(
         model_checkpoint, use_auth_token=True
     )
     raw_dataset = load_data(config["data"])
     tokenized_datasets = raw_dataset.map(preprocess_data, batched=True)
     model = AutoModelForSeq2SeqLM.from_pretrained(model_checkpoint)
+
+    index = 0
+    for dir in os.listdir(config["output_dir"]):
+        if dir.startswith(model_checkpoint):
+            index += 1
+    model_out_dir = Path(config["output_dir"]) / (
+        model_checkpoint.split("/")[-1] + "_" + str(index)
+    )
+
     args = init_args(
         config["hyper parameters"],
-        config["output_dir"],
+        model_out_dir,
         model_checkpoint.split("/")[-1],
     )
     data_collator = DataCollatorForSeq2Seq(tokenizer, model=model)
     trainer = init_trainer(
         args, data_collator, tokenized_datasets, tokenizer, model
     )
+
     trainer.train()
 
-# # config.yaml file
+    with open(os.path.join(model_out_dir, "data.yaml"), "w") as file:
+        yaml.dump(config, file)

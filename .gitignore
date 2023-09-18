@@ -46,3 +46,7 @@ dist/**
 src/QuestionGeneration/
 wandb/
 models/*
+bad-datasets/
+bad-models/
+data/*
+
