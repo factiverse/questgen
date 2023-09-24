@@ -238,37 +238,40 @@ if __name__ == "__main__":
 
     config = read_config_file(options["config"])
     metrics = config["metrics"]
-    model_checkpoint = config["model_checkpoint"]
+    # model_checkpoint = config["model_checkpoint"]
     wandb_tags = [
         "query generation",
         "question generation",
-        model_checkpoint.split("/")[-1],
+        config["model_checkpoint"].split("/")[-1],
         config["data"].split("/")[-1],
     ]
     wandb.init(
         tags=wandb_tags,
-        project="question generation " + model_checkpoint.split("/")[-1],
+        project="question generation",
     )
     # print("*************************************************",model_checkpoint)
     tokenizer = T5TokenizerFast.from_pretrained(
-        model_checkpoint, use_auth_token=True
+        config["model_checkpoint"], use_auth_token=True
     )
     raw_dataset = load_data(config["data"])
     tokenized_datasets = raw_dataset.map(preprocess_data, batched=True)
-    model = AutoModelForSeq2SeqLM.from_pretrained(model_checkpoint)
+    model = AutoModelForSeq2SeqLM.from_pretrained(config["model_checkpoint"])
 
+    model_name = (
+        config["model_checkpoint"].split("/")[-1]
+        + "_"
+        + config["data"].split("/")[-1]
+    )
     index = 0
     for dir in os.listdir(config["output_dir"]):
-        if dir.startswith(model_checkpoint):
+        if dir.startswith(model_name):
             index += 1
-    model_out_dir = Path(config["output_dir"]) / (
-        model_checkpoint.split("/")[-1] + "_" + str(index)
-    )
+    model_out_dir = Path(config["output_dir"]) / (model_name + "_" + str(index))
 
     args = init_args(
         config["hyper parameters"],
         model_out_dir,
-        model_checkpoint.split("/")[-1],
+        config["model_checkpoint"].split("/")[-1],
     )
     data_collator = DataCollatorForSeq2Seq(tokenizer, model=model)
     trainer = init_trainer(
