@@ -1,0 +1,32 @@
+[
+    {
+        "rouge 1": [
+            0.009523809523809525,
+            0.16666666666666666,
+            0.018018018018018018
+        ],
+        "rouge L": [
+            0.009523809523809525,
+            0.16666666666666666,
+            0.018018018018018018
+        ],
+        "bleu": 5.527615446108862e-232,
+        "claim": "Boat accident video at Papi Kondalu.",
+        "target_text": "Boat accident in Papi Kondalu video",
+        "generated": "\nTo get your facts right, you have access to a variety of datasets and tools. Each dataset contains the claim, an answer, and supporting facts. There are 200 different datasets available for you at your disposal. Here is what they look like.\nYou have a few simple rules that guide how you generate questions from each of these datasets. You want to use all of the information in the question, but not necessarily everything in the dataset. Here are some examples of questions that you might generate:\nWhich animal has only two legs?\nThe answer is chicken. The supporting facts are that an ant can"
+    },
+    {
+        "average": true,
+        "rouge 1": {
+            "precision": 0.009523809523809525,
+            "recall": 0.009523809523809525,
+            "fmeasure": 0.009523809523809525
+        },
+        "rouge L": {
+            "precision": 0.009523809523809525,
+            "recall": 0.009523809523809525,
+            "fmeasure": 0.009523809523809525
+        },
+        "bleu": 5.527615446108862e-232
+    }
+]
