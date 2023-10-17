@@ -6,6 +6,14 @@ import nltk  # type: ignore
 from nltk.tokenize import RegexpTokenizer  # type: ignore
 from rouge_score.rouge_scorer import RougeScorer  # type: ignore
 import argparse
+import logging
+
+logging.basicConfig(
+    format="%(asctime)s %(levelname)-4s [%(name)s:%(lineno)d] - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+    level=logging.INFO,
+)
+logger = logging.getLogger(__name__)
 
 
 def generate_question_from_llm(
@@ -37,7 +45,6 @@ def generate_question_from_llm(
         + "Question: "
     )
 
-    # print(prompt+"\n\nUser: "+user_input+"\n\nllama:")
     data = {
         "prompt": prompt + "\n\n" + user_input,
         "n_predict": 400,
@@ -150,7 +157,6 @@ if __name__ == "__main__":
         target = d["target_text"]
         rouge_score = rouge(target, gen_question)
         bleu_score = bleu(target, gen_question)
-        # print(rouge_score)
         scores.append(
             {
                 "rouge 1": rouge_score["rouge1"],
