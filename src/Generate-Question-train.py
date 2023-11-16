@@ -209,6 +209,7 @@ def init_args(
     hyper_parameters: typing.Dict[str, typing.Any],
     output_dir: str,
     model_checkpoint: str,
+    save_steps: int,
 ) -> Seq2SeqTrainingArguments:
     """Initalize the hyperparameters for the model to be trained on.
 
@@ -223,6 +224,7 @@ def init_args(
     print(output_dir)
     hyper_parameters["output_dir"] = Path(output_dir)
     hyper_parameters["learning_rate"] = float(hyper_parameters["learning_rate"])
+    hyper_parameters["save_steps"] = save_steps
     args = Seq2SeqTrainingArguments(**hyper_parameters)
     wandb.config.update(args.to_dict())
     return args
@@ -293,6 +295,7 @@ if __name__ == "__main__":
         raw_dataset = load_datasets(config["data"])
     else:
         raw_dataset = load_data(config["data"])
+
     tokenized_datasets = raw_dataset.map(preprocess_data, batched=True)
     model = AutoModelForSeq2SeqLM.from_pretrained(config["model_checkpoint"])
 
@@ -302,11 +305,14 @@ if __name__ == "__main__":
         if dir.startswith(model_name):
             index += 1
     model_out_dir = Path(config["output_dir"]) / (model_name + "_" + str(index))
-
+    train_dataset_size = len(tokenized_datasets["train"])
+    batch_size = config["hyper parameters"]["per_device_train_batch_size"]
+    steps_per_epoch = train_dataset_size // batch_size
     args = init_args(
         config["hyper parameters"],
         model_out_dir,
         config["model_checkpoint"].split("/")[-1],
+        save_steps=steps_per_epoch,
     )
     data_collator = DataCollatorForSeq2Seq(tokenizer, model=model)
     trainer = init_trainer(
