@@ -1,4 +1,5 @@
 #!/bin/bash
+python3 src/Generate-Question-train.py --config src/model_configs/config-bart-base-all.yaml
 python3 src/Generate-Question-train.py --config src/model_configs/config-bart-base-faviq_r_set.yaml
 python3 src/Generate-Question-train.py --config src/model_configs/config-t5-base-faviq_r_set.yaml
 python3 src/Generate-Question-train.py --config src/model_configs/config-flan-t5-base-faviq_r_set.yaml

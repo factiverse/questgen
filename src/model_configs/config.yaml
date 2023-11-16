@@ -1,20 +1,20 @@
+data: data/gpt_generated
 hyper parameters:
-  evaluation_strategy: "epoch"
-  learning_rate: 2e-5
-  per_device_train_batch_size: 8
-  per_device_eval_batch_size: 8
-  weight_decay: 0.3
-  num_train_epochs: 5
-  predict_with_generate: true
+  evaluation_strategy: epoch
   fp16: true
-  overwrite_output_dir: true
+  learning_rate: 2e-5
   no_cuda: false
-
-data: data/sample
-output_dir: models/
-model_checkpoint: "t5-small-finetuned-xsum"
-wandb_tags: ["query generation", "question generation"]
-
+  num_train_epochs: 5
+  overwrite_output_dir: true
+  per_device_eval_batch_size: 8
+  per_device_train_batch_size: 8
+  predict_with_generate: true
+  weight_decay: 0.3
 metrics:
-  rouge: true
   bleu: true
+  rouge: true
+model_checkpoint: models/flan-t5-base_calim_decomp_0
+output_dir: models/
+wandb_tags:
+- query generation
+- question generation

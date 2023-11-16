@@ -1,6 +1,7 @@
 """Finetune a Seq 2 Seq Language Model."""
 
 import datasets  # type: ignore
+from datasets import DatasetDict
 import evaluate  # type: ignore
 from transformers import (  # type: ignore
     AutoModelForSeq2SeqLM,
@@ -41,6 +42,37 @@ def read_config_file(file_name: str) -> typing.Dict[str, typing.Any]:
     with open(file_name, "r") as file:
         config = yaml.safe_load(file)
     return config
+
+
+def load_datasets(dataset_paths: typing.List[str]) -> datasets.DatasetDict:
+    """Loads a list of datasets.
+
+    Args:
+        dataset_paths: List of dataset paths.
+
+    Returns:
+        The training and test data. Returns None if data does not exist.
+    """
+    merged_train_datasets = []
+    merged_test_datasets = []
+    for data in dataset_paths:
+        loaded_dataset = load_data(data)
+        merged_train_datasets.append(loaded_dataset["train"])
+        merged_test_datasets.append(loaded_dataset["test"])
+    merged_train_dataset = datasets.concatenate_datasets(merged_train_datasets)
+    merged_test_dataset = datasets.concatenate_datasets(merged_test_datasets)
+    print("Merged Train Dataset Size:", len(merged_train_dataset))
+    print("Merged Test Dataset Size:", len(merged_test_dataset))
+
+    merged_dataset = DatasetDict(
+        {"train": merged_train_dataset, "test": merged_test_dataset}
+    )
+    # print("Merged Train Dataset Info:")
+    # print(merged_dataset.info())
+
+    # print("\nMerged Test Dataset Info:")
+    # print(merged_dataset.info())
+    return merged_dataset
 
 
 def load_data(train_test_dir: str) -> datasets.DatasetDict:
@@ -239,11 +271,15 @@ if __name__ == "__main__":
     config = read_config_file(options["config"])
     metrics = config["metrics"]
     # model_checkpoint = config["model_checkpoint"]
+    if isinstance(config["data"], list):
+        dataset_name = "all"
+    else:
+        dataset_name = config["data"].split("/")[-1]
     wandb_tags = [
         "query generation",
         "question generation",
         config["model_checkpoint"].split("/")[-1],
-        config["data"].split("/")[-1],
+        dataset_name,
     ]
     wandb.init(
         tags=wandb_tags,
@@ -253,15 +289,14 @@ if __name__ == "__main__":
     tokenizer = T5TokenizerFast.from_pretrained(
         config["model_checkpoint"], use_auth_token=True
     )
-    raw_dataset = load_data(config["data"])
+    if isinstance(config["data"], list):
+        raw_dataset = load_datasets(config["data"])
+    else:
+        raw_dataset = load_data(config["data"])
     tokenized_datasets = raw_dataset.map(preprocess_data, batched=True)
     model = AutoModelForSeq2SeqLM.from_pretrained(config["model_checkpoint"])
 
-    model_name = (
-        config["model_checkpoint"].split("/")[-1]
-        + "_"
-        + config["data"].split("/")[-1]
-    )
+    model_name = config["model_checkpoint"].split("/")[-1] + "_" + dataset_name
     index = 0
     for dir in os.listdir(config["output_dir"]):
         if dir.startswith(model_name):
