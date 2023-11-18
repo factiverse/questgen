@@ -274,15 +274,19 @@ if __name__ == "__main__":
     metrics = config["metrics"]
     # model_checkpoint = config["model_checkpoint"]
     if isinstance(config["data"], list):
-        dataset_name = "all"
+        wandb_dataset_tags = [
+            datataset.split("/")[-1] for datataset in config["data"]
+        ]
+        dataset_name = "_".join(wandb_dataset_tags)
     else:
         dataset_name = config["data"].split("/")[-1]
+        wandb_dataset_tags = [dataset_name]
     wandb_tags = [
         "query generation",
         "question generation",
         config["model_checkpoint"].split("/")[-1],
-        dataset_name,
     ]
+    wandb_tags.extend(wandb_dataset_tags)
     wandb.init(
         tags=wandb_tags,
         project="question generation",
