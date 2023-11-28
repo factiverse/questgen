@@ -20,6 +20,8 @@ import os
 import logging
 import numpy as np
 import typing
+from Load_Data import load_data, load_datasets
+from util import read_config_file, init_args
 
 logging.basicConfig(
     format="%(asctime)s %(levelname)-4s [%(name)s:%(lineno)d] - %(message)s",
@@ -30,81 +32,11 @@ logger = logging.getLogger(__name__)
 metrics: typing.Dict[str, bool] = {}
 
 
-def read_config_file(file_name: str) -> typing.Dict[str, typing.Any]:
-    """Reads YAML config from a config file.
-
-    Args:
-        file_name: The location where the config file is stored.
-
-    Returns:
-        The contents of the YAML file.
-    """
-    with open(file_name, "r") as file:
-        config = yaml.safe_load(file)
-    return config
-
-
-def load_datasets(dataset_paths: typing.List[str]) -> datasets.DatasetDict:
-    """Loads a list of datasets.
-
-    Args:
-        dataset_paths: List of dataset paths.
-
-    Returns:
-        The training and test data. Returns None if data does not exist.
-    """
-    merged_train_datasets = []
-    merged_test_datasets = []
-    for data in dataset_paths:
-        loaded_dataset = load_data(data)
-        merged_train_datasets.append(loaded_dataset["train"])
-        merged_test_datasets.append(loaded_dataset["test"])
-    merged_train_dataset = datasets.concatenate_datasets(merged_train_datasets)
-    merged_test_dataset = datasets.concatenate_datasets(merged_test_datasets)
-    print("Merged Train Dataset Size:", len(merged_train_dataset))
-    print("Merged Test Dataset Size:", len(merged_test_dataset))
-
-    merged_dataset = DatasetDict(
-        {"train": merged_train_dataset, "test": merged_test_dataset}
-    )
-    # print("Merged Train Dataset Info:")
-    # print(merged_dataset.info())
-
-    # print("\nMerged Test Dataset Info:")
-    # print(merged_dataset.info())
-    return merged_dataset
-
-
-def load_data(train_test_dir: str) -> datasets.DatasetDict:
-    """Loads data from train and test json files.
-
-    Args:
-        train_test_dir: The path to train and test data.
-
-    Returns:
-        The training and test data. Returns None if data does not exist.
-    """
-    train_file = os.path.join(train_test_dir, "train.json")
-    test_file = os.path.join(train_test_dir, "test.json")
-
-    if os.path.exists(train_file) and os.path.exists(test_file):
-        raw_dataset_train = datasets.load_dataset("json", data_files=train_file)
-        raw_dataset_test = datasets.load_dataset("json", data_files=test_file)
-        raw_dataset = raw_dataset_train
-        raw_dataset["test"] = raw_dataset_test["train"]
-        return raw_dataset
-    else:
-        logger.error(
-            FileNotFoundError(
-                f"The directory {train_test_dir}\
-                    does not contain 'train.json' and 'test.json'"
-            ),
-            exc_info=True,
-        )
-
-
 def preprocess_data(
-    data: typing.Dict[str, list], max_input_length=512, max_target_length=512
+    data: typing.Dict[str, list],
+    max_input_length=512,
+    max_target_length=512,
+    use_prefix=False,
 ) -> typing.Dict[str, list]:
     """Converts data to tokenized data.
 
@@ -119,9 +51,13 @@ def preprocess_data(
     Returns:
         Tokenizes the data (parameter).
     """
-    inputs = [
-        pre + ": " + inp for inp, pre in zip(data["input_text"], data["prefix"])
-    ]
+    if use_prefix:
+        inputs = [
+            pre + ": " + inp
+            for inp, pre in zip(data["input_text"], data["prefix"])
+        ]
+    else:
+        inputs = [inp for inp in data["input_text"]]
     model_inputs = tokenizer(
         inputs, max_length=max_input_length, truncation=True
     )
@@ -205,31 +141,6 @@ def compute_metrics(eval_pred: EvalPrediction) -> typing.Dict[str, float]:
     return bleu_rouge_score
 
 
-def init_args(
-    hyper_parameters: typing.Dict[str, typing.Any],
-    output_dir: str,
-    model_checkpoint: str,
-    save_steps: int,
-) -> Seq2SeqTrainingArguments:
-    """Initalize the hyperparameters for the model to be trained on.
-
-    Args:
-        hyper_parameters: Hyperparameters from config.
-        output_dir: Where the model will be stored after training.
-        model_checkpoint: Name of the model we will finetune.
-
-    Returns:
-        The hyperparameters of the model.
-    """
-    print(output_dir)
-    hyper_parameters["output_dir"] = Path(output_dir)
-    hyper_parameters["learning_rate"] = float(hyper_parameters["learning_rate"])
-    hyper_parameters["save_steps"] = save_steps
-    args = Seq2SeqTrainingArguments(**hyper_parameters)
-    wandb.config.update(args.to_dict())
-    return args
-
-
 def init_trainer(
     train_args: Seq2SeqTrainingArguments,
     data_collator: DataCollatorForSeq2Seq,
@@ -291,7 +202,7 @@ if __name__ == "__main__":
         tags=wandb_tags,
         project="question generation",
     )
-    # print("*************************************************",model_checkpoint)
+
     tokenizer = T5TokenizerFast.from_pretrained(
         config["model_checkpoint"], use_auth_token=True
     )
@@ -309,13 +220,13 @@ if __name__ == "__main__":
         if dir.startswith(model_name):
             index += 1
     model_out_dir = Path(config["output_dir"]) / (model_name + "_" + str(index))
+    print(tokenized_datasets)
     train_dataset_size = len(tokenized_datasets["train"])
     batch_size = config["hyper parameters"]["per_device_train_batch_size"]
     steps_per_epoch = train_dataset_size // batch_size
     args = init_args(
         config["hyper parameters"],
         model_out_dir,
-        config["model_checkpoint"].split("/")[-1],
         save_steps=steps_per_epoch,
     )
     data_collator = DataCollatorForSeq2Seq(tokenizer, model=model)

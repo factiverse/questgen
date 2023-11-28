@@ -19,6 +19,8 @@ import datasets  # type: ignore
 import evaluate  # type: ignore
 import torch
 import json
+from Load_Data import load_data, load_datasets
+from util import read_config_file, init_args
 
 logging.basicConfig(
     format="%(asctime)s %(levelname)-4s [%(name)s:%(lineno)d] - %(message)s",
@@ -29,21 +31,7 @@ logger = logging.getLogger(__name__)
 metrics: typing.Dict[str, bool] = {}
 
 
-def read_config_file(file_name: str) -> typing.Dict[str, typing.Any]:
-    """Reads YAML config from a config file.
-
-    Args:
-        file_name: the location where the config file is stored
-
-    Returns:
-        the contents of the YAML file
-    """
-    with open(file_name, "r") as file:
-        config = yaml.safe_load(file)
-    return config
-
-
-def get_model_checkpoint_path(config: dict) -> str:
+def get_latest_checkpoint_path(config: dict) -> str:
     """Get last checkpoint to test on most recently trained model.
 
     Args:
@@ -80,31 +68,6 @@ def get_model_checkpoint_path(config: dict) -> str:
             exc_info=True,
         )
     return model_checkpoint
-
-
-def init_args(
-    hyper_parameters: typing.Dict[str, typing.Any],
-    output_dir: str,
-    model_checkpoint: str,
-) -> Seq2SeqTrainingArguments:
-    """Initalize the hyperparameters for the model to be trained on.
-
-    Args:
-        hyper_parameters: Hyperparameters from config.
-        output_dir: Where the model will be stored after training.
-        model_checkpoint: Name of the model we will finetune.
-
-    Returns:
-        The hyperparameters of the model.
-    """
-    index = 0
-    for dir in os.listdir(output_dir):
-        if dir.startswith(model_checkpoint):
-            index += 1
-    hyper_parameters["output_dir"] = Path(output_dir) / model_checkpoint
-    hyper_parameters["learning_rate"] = float(hyper_parameters["learning_rate"])
-    args = Seq2SeqTrainingArguments(**hyper_parameters)
-    return args
 
 
 def predict(
@@ -202,33 +165,6 @@ def compute_metrics(eval_pred: EvalPrediction) -> typing.Dict[str, float]:
     return bleu_rouge_score
 
 
-def load_data(test_dir: str) -> datasets.DatasetDict:
-    """Loads data from test json files.
-
-    Args:
-        test_dir: The path to test data.
-
-    Returns:
-        The test data. Returns None if data does not exist.
-    """
-    test_file = os.path.join(test_dir, "test-10.json")
-
-    if os.path.exists(test_file):
-        raw_dataset_test = datasets.load_dataset("json", data_files=test_file)
-        raw_dataset_test["test"] = raw_dataset_test["train"]
-        del raw_dataset_test["train"]
-        # raw_dataset_test["test"].to(device)
-        return raw_dataset_test
-    else:
-        logger.error(
-            FileNotFoundError(
-                f"The directory {test_dir} \
-                    does not contain 'test.json'"
-            ),
-            exc_info=True,
-        )
-
-
 def preprocess_data(
     data: typing.Dict[str, list], max_input_length=512, max_target_length=512
 ) -> typing.Dict[str, list]:
@@ -280,12 +216,69 @@ def preprocess_data(
     return model_inputs
 
 
+def top_k_top_p_filtering(logits, top_k=50, top_p=0.95):
+    # Sort logits and keep top k tokens only
+    top_k = min(top_k, logits.size(-1))
+    indices_to_remove = logits < torch.topk(logits, top_k)[0][..., -1, None]
+    logits[indices_to_remove] = -float("Inf")
+
+    # Convert logits to probabilities
+    probabilities = torch.nn.functional.softmax(logits, dim=-1)
+
+    # Sort the probabilities to identify the cumulative sum up to top_p
+    sorted_probabilities, sorted_indices = torch.sort(
+        probabilities, descending=True
+    )
+    cumulative_probabilities = torch.cumsum(sorted_probabilities, dim=-1)
+
+    # Remove tokens with a cumulative probability above the threshold
+    sorted_indices_to_remove = cumulative_probabilities > top_p
+    sorted_indices_to_remove[..., 1:] = sorted_indices_to_remove[
+        ..., :-1
+    ].clone()
+    sorted_indices_to_remove[..., 0] = 0
+
+    indices_to_remove = sorted_indices_to_remove.scatter(
+        dim=-1, index=sorted_indices, src=sorted_indices_to_remove
+    )
+    probabilities[indices_to_remove] = 0
+
+    return probabilities
+
+
+def generate_sequences(
+    input_text, model, tokenizer, num_sequences=3, max_length=50
+):
+    input_ids = tokenizer.encode(input_text, return_tensors="pt")
+    generated_sequences = []
+
+    for _ in range(num_sequences):
+        output_sequence = input_ids
+        for _ in range(max_length):
+            outputs = model(output_sequence, return_dict=True)
+            next_token_logits = outputs.logits[:, -1, :]
+            filtered_probabilities = top_k_top_p_filtering(next_token_logits)
+            next_token = torch.multinomial(filtered_probabilities, 1)
+            output_sequence = torch.cat([output_sequence, next_token], dim=-1)
+
+            # Stop generating if the model produces the end-of-sequence token
+            if next_token.item() == tokenizer.eos_token_id:
+                break
+
+        decoded_sequence = tokenizer.decode(
+            output_sequence[0], skip_special_tokens=True
+        )
+        generated_sequences.append(decoded_sequence)
+
+    return generated_sequences
+
+
 def eval(
-    val_data_path: str,
+    val_data_path: typing.List[str],
     model: AutoModelForSeq2SeqLM,
     tokenizer: AutoTokenizer,
     args: Seq2SeqTrainingArguments,
-    model_path: str,
+    output_dir: str,
 ) -> typing.Dict[str, float]:
     """Evaluate the Seq2Seq model.
 
@@ -295,13 +288,11 @@ def eval(
         tokenizer: The string tokenizer.
             Converts strings to tokenized strings.
         args: Testing Arguments
-        model_path: the path where the Seq2Seq model is stored.
-            We are running evaluations on this model.
 
     Returns:
         The Rouge and Bleu scores of the model.
     """
-    raw_dataset = load_data(val_data_path)
+    raw_dataset = load_datasets(val_data_path)
     tokenized_datasets = raw_dataset.map(preprocess_data, batched=True)
 
     trainer = Seq2SeqTrainer(
@@ -322,18 +313,14 @@ def eval(
 
     with open(
         os.path.join(
-            "/".join(model_path.split("/")[0:-1]),
-            str(val_data_path.split("/")[-1]) + ".json",
+            output_dir,
+            str("_with_".join(val_data_path).split("/")[-1]) + ".json",
         ),
         "w",
     ) as file:
         json.dump(all_res, file, indent=4)
 
     logger.info(f"Metric results: {results}")
-    # outputs = model.generate(
-    #     torch.tensor(tokenized_datasets["test"]["input_ids"],device=device)
-    # )
-    # model_gen = tokenizer.decode(outputs)
     return results
 
 
@@ -349,30 +336,38 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     options = vars(args)
-
     config = read_config_file(options["config"])
+    output_dir = config["output_dir"]
     metrics = config["metrics"]
-
-    model_checkpoint = get_model_checkpoint_path(config)
     args = init_args(
         config["hyper parameters"],
-        config["output_dir"],
-        model_checkpoint.split("/")[-2],
+        output_dir,
     )
-
+    if "model_checkpoint" in config:
+        model_checkpoint = get_latest_checkpoint_path(config)
+        model_path = model_checkpoint
+    if "hf_model" in config:
+        model_path = config["hf_model"]
     tokenizer = AutoTokenizer.from_pretrained(
-        model_checkpoint, use_auth_token=True, device=device
+        model_path, use_auth_token=True, device=device
     )
 
-    model = AutoModelForSeq2SeqLM.from_pretrained(model_checkpoint)
+    model = AutoModelForSeq2SeqLM.from_pretrained(model_path)
     model.to(device)
 
-    logger.info(
-        "type a claim to see how the model responds \
-                 (q+enter to quit)"
-    )
+    # logger.info(
+    #     "type a claim to see how the model responds \
+    #              (q+enter to quit)"
+    # )
 
-    eval(config["data"], model, tokenizer, args, model_checkpoint)
+    eval(
+        config["data"],
+        model,
+        tokenizer,
+        args,
+        model_path,
+        output_dir=output_dir,
+    )
     # while True:
     #     inp = input()
     #     if inp == "q":
