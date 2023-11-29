@@ -10,6 +10,7 @@ from transformers import (  # type: ignore
     Seq2SeqTrainer,
     T5TokenizerFast,
     EvalPrediction,
+    EarlyStoppingCallback,
 )
 import nltk  # type: ignore
 import wandb
@@ -22,6 +23,9 @@ import numpy as np
 import typing
 from Load_Data import load_data, load_datasets
 from util import read_config_file, init_args
+import glob
+import shutil
+
 
 logging.basicConfig(
     format="%(asctime)s %(levelname)-4s [%(name)s:%(lineno)d] - %(message)s",
@@ -168,6 +172,7 @@ def init_trainer(
         data_collator=data_collator,
         tokenizer=tokenizer,
         compute_metrics=compute_metrics,
+        callbacks=[EarlyStoppingCallback(early_stopping_patience=3)],
     )
 
 
@@ -223,7 +228,11 @@ if __name__ == "__main__":
     print(tokenized_datasets)
     train_dataset_size = len(tokenized_datasets["train"])
     batch_size = config["hyper parameters"]["per_device_train_batch_size"]
-    steps_per_epoch = train_dataset_size // batch_size
+    steps_per_epoch = (
+        train_dataset_size
+        * config["hyper parameters"]["num_train_epochs"]
+        // batch_size
+    )
     args = init_args(
         config["hyper parameters"],
         model_out_dir,
@@ -235,6 +244,11 @@ if __name__ == "__main__":
     )
 
     trainer.train()
-
+    print(model_out_dir)
+    checkpoints_dir = str(model_out_dir / "checkpoint-*")
+    print(checkpoints_dir)
+    for checkpoint_dir in glob.glob(checkpoints_dir):
+        if checkpoint_dir != trainer.state.best_model_checkpoint:
+            shutil.rmtree(checkpoint_dir)
     with open(os.path.join(model_out_dir, "data.yaml"), "w") as file:
         yaml.dump(config, file)
