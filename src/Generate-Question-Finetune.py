@@ -1,31 +1,35 @@
 """Finetune a Seq 2 Seq Language Model."""
 
+import argparse
+import glob
+import logging
+import os
+import shutil
+import typing
+from pathlib import Path
+
 import datasets  # type: ignore
-from datasets import DatasetDict
 import evaluate  # type: ignore
+import nltk  # type: ignore
+import numpy as np
+import wandb
+import yaml  # type: ignore
+from datasets import DatasetDict
 from transformers import (  # type: ignore
     AutoModelForSeq2SeqLM,
+    BloomForCausalLM,
+    BloomModel,
+    BloomTokenizerFast,
     DataCollatorForSeq2Seq,
-    Seq2SeqTrainingArguments,
-    Seq2SeqTrainer,
-    T5TokenizerFast,
-    EvalPrediction,
     EarlyStoppingCallback,
+    EvalPrediction,
+    Seq2SeqTrainer,
+    Seq2SeqTrainingArguments,
+    T5TokenizerFast,
 )
-import nltk  # type: ignore
-import wandb
-from pathlib import Path
-import yaml  # type: ignore
-import argparse
-import os
-import logging
-import numpy as np
-import typing
-from Load_Data import load_data, load_datasets
-from util import read_config_file, init_args
-import glob
-import shutil
 
+from Load_Data import load_data, load_datasets
+from util import init_args, read_config_file
 
 logging.basicConfig(
     format="%(asctime)s %(levelname)-4s [%(name)s:%(lineno)d] - %(message)s",
@@ -38,6 +42,7 @@ metrics: typing.Dict[str, bool] = {}
 
 def preprocess_data(
     data: typing.Dict[str, list],
+    tokenizer: T5TokenizerFast,
     max_input_length=512,
     max_target_length=512,
     use_prefix=False,
@@ -63,12 +68,16 @@ def preprocess_data(
     else:
         inputs = [inp for inp in data["input_text"]]
     model_inputs = tokenizer(
-        inputs, max_length=max_input_length, truncation=True
+        inputs,
+        padding="max_length",
+        truncation=True,
+        max_length=max_input_length,
     )
     labels = tokenizer(
         text_target=data["target_text"],
-        max_length=max_target_length,
+        padding="max_length",
         truncation=True,
+        max_length=max_target_length,
     )
     model_inputs["labels"] = labels["input_ids"]
     return model_inputs
@@ -207,18 +216,34 @@ if __name__ == "__main__":
         tags=wandb_tags,
         project="question generation",
     )
-
-    tokenizer = T5TokenizerFast.from_pretrained(
-        config["model_checkpoint"], use_auth_token=True
-    )
+    if "bloom" in config["model_checkpoint"]:
+        tokenizer = BloomTokenizerFast.from_pretrained(
+            config["model_checkpoint"], use_auth_token=True
+        )
+        model = BloomForCausalLM.from_pretrained(config["model_checkpoint"])
+    else:
+        tokenizer = T5TokenizerFast.from_pretrained(
+            config["model_checkpoint"], use_auth_token=True
+        )
+        model = AutoModelForSeq2SeqLM.from_pretrained(
+            config["model_checkpoint"]
+        )
     if isinstance(config["data"], list):
         raw_dataset = load_datasets(config["data"])
     else:
         raw_dataset = load_data(config["data"])
 
-    tokenized_datasets = raw_dataset.map(preprocess_data, batched=True)
-    model = AutoModelForSeq2SeqLM.from_pretrained(config["model_checkpoint"])
-
+    # tokenized_datasets = raw_dataset.map(preprocess_data, batched=True)
+    tokenized_datasets = raw_dataset.map(
+        lambda examples: preprocess_data(
+            examples,
+            tokenizer,
+            max_input_length=512,
+            max_target_length=512,
+            use_prefix=False,
+        ),
+        batched=True,
+    )
     model_name = config["model_checkpoint"].split("/")[-1] + "_" + dataset_name
     index = 0
     for dir in os.listdir(config["output_dir"]):
