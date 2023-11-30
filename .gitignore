@@ -50,5 +50,3 @@ bad-datasets/
 bad-models/
 data/*
 models_old/*
-src/model_configs
-src/table/*
