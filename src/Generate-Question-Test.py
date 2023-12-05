@@ -6,21 +6,21 @@ from transformers import (  # type: ignore
     EvalPrediction,
     Seq2SeqTrainer,
     Seq2SeqTrainingArguments,
+    BloomForCausalLM,
+    BloomTokenizerFast,
+    T5TokenizerFast,
 )
-import yaml  # type: ignore
 import argparse
 import os
 import logging
-from pathlib import Path
 import typing
 import numpy as np
 import nltk  # type: ignore
-import datasets  # type: ignore
 import evaluate  # type: ignore
 import torch
 import json
-from Load_Data import load_data, load_datasets
-from util import read_config_file, init_args
+from src.Load_Data import load_datasets
+from src.util import get_wandb_tags, read_config_file, init_args
 
 logging.basicConfig(
     format="%(asctime)s %(levelname)-4s [%(name)s:%(lineno)d] - %(message)s",
@@ -216,63 +216,6 @@ def preprocess_data(
     return model_inputs
 
 
-def top_k_top_p_filtering(logits, top_k=50, top_p=0.95):
-    # Sort logits and keep top k tokens only
-    top_k = min(top_k, logits.size(-1))
-    indices_to_remove = logits < torch.topk(logits, top_k)[0][..., -1, None]
-    logits[indices_to_remove] = -float("Inf")
-
-    # Convert logits to probabilities
-    probabilities = torch.nn.functional.softmax(logits, dim=-1)
-
-    # Sort the probabilities to identify the cumulative sum up to top_p
-    sorted_probabilities, sorted_indices = torch.sort(
-        probabilities, descending=True
-    )
-    cumulative_probabilities = torch.cumsum(sorted_probabilities, dim=-1)
-
-    # Remove tokens with a cumulative probability above the threshold
-    sorted_indices_to_remove = cumulative_probabilities > top_p
-    sorted_indices_to_remove[..., 1:] = sorted_indices_to_remove[
-        ..., :-1
-    ].clone()
-    sorted_indices_to_remove[..., 0] = 0
-
-    indices_to_remove = sorted_indices_to_remove.scatter(
-        dim=-1, index=sorted_indices, src=sorted_indices_to_remove
-    )
-    probabilities[indices_to_remove] = 0
-
-    return probabilities
-
-
-def generate_sequences(
-    input_text, model, tokenizer, num_sequences=3, max_length=50
-):
-    input_ids = tokenizer.encode(input_text, return_tensors="pt")
-    generated_sequences = []
-
-    for _ in range(num_sequences):
-        output_sequence = input_ids
-        for _ in range(max_length):
-            outputs = model(output_sequence, return_dict=True)
-            next_token_logits = outputs.logits[:, -1, :]
-            filtered_probabilities = top_k_top_p_filtering(next_token_logits)
-            next_token = torch.multinomial(filtered_probabilities, 1)
-            output_sequence = torch.cat([output_sequence, next_token], dim=-1)
-
-            # Stop generating if the model produces the end-of-sequence token
-            if next_token.item() == tokenizer.eos_token_id:
-                break
-
-        decoded_sequence = tokenizer.decode(
-            output_sequence[0], skip_special_tokens=True
-        )
-        generated_sequences.append(decoded_sequence)
-
-    return generated_sequences
-
-
 def eval(
     val_data_path: typing.List[str],
     model: AutoModelForSeq2SeqLM,
@@ -343,16 +286,29 @@ if __name__ == "__main__":
         config["hyper parameters"],
         output_dir,
     )
+    wandb_dataset_tags, dataset_name = get_wandb_tags(config)
+    # wandb.init(
+    #     tags=wandb_dataset_tags,
+    #     project="question generation evaluation",
+    # )
+    # wandb.config.update(args.to_dict())
+
     if "model_checkpoint" in config:
         model_checkpoint = get_latest_checkpoint_path(config)
         model_path = model_checkpoint
     if "hf_model" in config:
         model_path = config["hf_model"]
-    tokenizer = AutoTokenizer.from_pretrained(
-        model_path, use_auth_token=True, device=device
-    )
-
-    model = AutoModelForSeq2SeqLM.from_pretrained(model_path)
+    model_path = "Factiverse/T5-base-questgen"
+    if "bloom" in config["model_checkpoint"]:
+        tokenizer = BloomTokenizerFast.from_pretrained(
+            model_path, use_auth_token=True
+        )
+        model = BloomForCausalLM.from_pretrained(model_path)
+    else:
+        tokenizer = T5TokenizerFast.from_pretrained(
+            model_path, use_auth_token=True
+        )
+        model = AutoModelForSeq2SeqLM.from_pretrained(model_path)
     model.to(device)
 
     # logger.info(
@@ -360,19 +316,41 @@ if __name__ == "__main__":
     #              (q+enter to quit)"
     # )
 
-    eval(
-        config["data"],
-        model,
-        tokenizer,
-        args,
-        model_path,
-        output_dir=output_dir,
-    )
-    # while True:
-    #     inp = input()
-    #     if inp == "q":
-    #         break
-    #     input_ids = tokenizer(inp, return_tensors="pt")
-    #     print(input_ids["input_ids"])
-    #     outputs = model.generate(input_ids["input_ids"])
-    #     print(tokenizer.decode(outputs[0], skip_special_tokens=True))
+    # eval(
+    #     config["data"],
+    #     model,
+    #     tokenizer,
+    #     args,
+    #     model_path
+    # )
+    print("Enter a claim:")
+    while True:
+        inp = input()
+        if inp == "q":
+            break
+        input_ids = tokenizer(inp, return_tensors="pt").to(device)
+        print(input_ids["input_ids"])
+        # outputs = model.generate(input_ids["input_ids"], max_new_tokens=512,
+        #     do_sample=False,
+        #     top_k=50,
+        #     top_p=0.95,
+        #     num_return_sequences=3,
+        #     repetition_penalty=1.2,
+        #     temperature=1.5,
+        #     epsilon_cutoff=3e-4,
+        #     diversity_penalty=1.99,
+        #     num_beam_groups=3,
+        #     num_beams=9
+        #     )
+        outputs = model.generate(
+            input_ids["input_ids"],
+            num_beams=5,
+            num_beam_groups=5,
+            max_new_tokens=30,
+            diversity_penalty=1.0,
+            num_return_sequences=3,
+        )
+        for i in range(outputs.shape[0]):
+            print(f"Output {i+1}:")
+            output_text = tokenizer.decode(outputs[i], skip_special_tokens=True)
+            print(output_text)

@@ -1,28 +1,14 @@
-"""Utility functions needed for both finetuning and testing"""
+"""Utility functions needed for both finetuning and testing."""
 
 from transformers import (  # type: ignore
-    AutoTokenizer,
-    AutoModelForSeq2SeqLM,
-    EvalPrediction,
-    Seq2SeqTrainer,
     Seq2SeqTrainingArguments,
 )
 import yaml  # type: ignore
-import argparse
-import os
-import logging
 from pathlib import Path
-import typing
-import numpy as np
-import wandb
-import nltk  # type: ignore
-import datasets  # type: ignore
-import evaluate  # type: ignore
-import torch
-import json
+from typing import Dict, Any, List, Tuple
 
 
-def read_config_file(file_name: str) -> typing.Dict[str, typing.Any]:
+def read_config_file(file_name: str) -> Dict[str, Any]:
     """Reads YAML config from a config file.
 
     Args:
@@ -37,7 +23,7 @@ def read_config_file(file_name: str) -> typing.Dict[str, typing.Any]:
 
 
 def init_args(
-    hyper_parameters: typing.Dict[str, typing.Any],
+    hyper_parameters: Dict[str, Any],
     output_dir: str,
     save_steps: int = 500,
 ) -> Seq2SeqTrainingArguments:
@@ -61,5 +47,24 @@ def init_args(
     hyper_parameters["greater_is_better"] = True
     hyper_parameters["load_best_model_at_end"] = True
     args = Seq2SeqTrainingArguments(**hyper_parameters)
-    wandb.config.update(args.to_dict())
     return args
+
+
+def get_wandb_tags(config: Dict[str, Any]) -> Tuple[List[str], str]:
+    """Gets the tags for wandb.
+
+    Args:
+        config: Model config.
+
+    Returns:
+        Tuple of wandb tags and dataset name.
+    """
+    if isinstance(config["data"], list):
+        wandb_dataset_tags = [
+            datataset.split("/")[-1] for datataset in config["data"]
+        ]
+        dataset_name = "_".join(wandb_dataset_tags)
+    else:
+        dataset_name = config["data"].split("/")[-1]
+        wandb_dataset_tags = [dataset_name]
+    return wandb_dataset_tags, dataset_name

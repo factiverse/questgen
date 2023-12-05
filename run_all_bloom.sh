@@ -1,5 +1,5 @@
 #!/bin/bash
-# CUDA_VISIBLE_DEVICES=1,2 python3 src/Generate-Question-Finetune.py --config src/model_configs/config-bloom-560m-claim_decomp.yaml
+CUDA_VISIBLE_DEVICES=1,2 python3 src/Generate-Question-Finetune.py --config src/model_configs/config-bloom-560m-claim_decomp.yaml
 CUDA_VISIBLE_DEVICES=1,2 python3 src/Generate-Question-Finetune.py --config src/model_configs/config-bloom-560m-fact_checking_briefs.yaml
 CUDA_VISIBLE_DEVICES=1,2 python3 src/Generate-Question-Finetune.py --config src/model_configs/config-bloom-560m-claim_decomp-fact_checking_briefs.yaml
 CUDA_VISIBLE_DEVICES=1,2 python3 src/Generate-Question-Finetune.py --config src/model_configs/config-bloom-560m-gpt_generated.yaml

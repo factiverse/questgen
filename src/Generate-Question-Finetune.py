@@ -14,11 +14,9 @@ import nltk  # type: ignore
 import numpy as np
 import wandb
 import yaml  # type: ignore
-from datasets import DatasetDict
 from transformers import (  # type: ignore
     AutoModelForSeq2SeqLM,
     BloomForCausalLM,
-    BloomModel,
     BloomTokenizerFast,
     DataCollatorForSeq2Seq,
     EarlyStoppingCallback,
@@ -29,7 +27,7 @@ from transformers import (  # type: ignore
 )
 
 from Load_Data import load_data, load_datasets
-from util import init_args, read_config_file
+from util import init_args, read_config_file, get_wandb_tags
 
 logging.basicConfig(
     format="%(asctime)s %(levelname)-4s [%(name)s:%(lineno)d] - %(message)s",
@@ -43,8 +41,8 @@ metrics: typing.Dict[str, bool] = {}
 def preprocess_data(
     data: typing.Dict[str, list],
     tokenizer: T5TokenizerFast,
-    max_input_length=512,
-    max_target_length=512,
+    max_input_length=1024,
+    max_target_length=1024,
     use_prefix=False,
 ) -> typing.Dict[str, list]:
     """Converts data to tokenized data.
@@ -198,14 +196,7 @@ if __name__ == "__main__":
     config = read_config_file(options["config"])
     metrics = config["metrics"]
     # model_checkpoint = config["model_checkpoint"]
-    if isinstance(config["data"], list):
-        wandb_dataset_tags = [
-            datataset.split("/")[-1] for datataset in config["data"]
-        ]
-        dataset_name = "_".join(wandb_dataset_tags)
-    else:
-        dataset_name = config["data"].split("/")[-1]
-        wandb_dataset_tags = [dataset_name]
+    wandb_dataset_tags, dataset_name = get_wandb_tags(config)
     wandb_tags = [
         "query generation",
         "question generation",
