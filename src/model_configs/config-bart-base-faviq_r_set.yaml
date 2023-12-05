@@ -1,0 +1,20 @@
+data: data/faviq_r_set
+hyper parameters:
+  evaluation_strategy: epoch
+  fp16: true
+  learning_rate: 2e-5
+  no_cuda: false
+  num_train_epochs: 10
+  overwrite_output_dir: true
+  per_device_eval_batch_size: 64
+  per_device_train_batch_size: 64
+  predict_with_generate: true
+  weight_decay: 0.3
+metrics:
+  bleu: true
+  rouge: true
+model_checkpoint: facebook/bart-base
+output_dir: models/
+wandb_tags:
+- query generation
+- question generation

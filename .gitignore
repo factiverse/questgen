@@ -43,3 +43,10 @@ pydevd*.log
 nodeLanguageServer/**
 nodeLanguageServer.*/**
 dist/**
+src/QuestionGeneration/
+wandb/
+models/*
+bad-datasets/
+bad-models/
+data/*
+models_old/*
