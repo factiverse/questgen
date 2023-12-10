@@ -14,8 +14,8 @@ import nltk  # type: ignore
 import numpy as np
 import wandb
 import yaml  # type: ignore
-from transformers import (  # type: ignore
-    AutoModelForSeq2SeqLM,
+from transformers import AutoModelForSeq2SeqLM  # type: ignore
+from transformers import (
     BloomForCausalLM,
     BloomTokenizerFast,
     DataCollatorForSeq2Seq,
@@ -27,7 +27,15 @@ from transformers import (  # type: ignore
 )
 
 from Load_Data import load_data, load_datasets
-from util import init_args, read_config_file, get_wandb_tags
+from util import (
+    compute_bert_score,
+    compute_blue,
+    compute_meteor,
+    compute_rouge,
+    get_wandb_tags,
+    init_args,
+    read_config_file,
+)
 
 logging.basicConfig(
     format="%(asctime)s %(levelname)-4s [%(name)s:%(lineno)d] - %(message)s",
@@ -96,9 +104,6 @@ def compute_metrics(eval_pred: EvalPrediction) -> typing.Dict[str, float]:
     Returns:
         Rouge and Bleu scores if requested.
     """
-    global metrics
-    rouge = metrics["rouge"]
-    bleu = metrics["bleu"]
 
     predictions, labels = eval_pred
     decoded_preds = tokenizer.batch_decode(
@@ -121,32 +126,20 @@ def compute_metrics(eval_pred: EvalPrediction) -> typing.Dict[str, float]:
     prediction_lens = [
         np.count_nonzero(pred != tokenizer.pad_token_id) for pred in predictions
     ]
+
     bleu_rouge_score = {}
 
-    if rouge:
-        metric_rouge = evaluate.load("rouge")
-        result_rouge = metric_rouge.compute(
-            predictions=decoded_preds,
-            references=decoded_labels,
-            use_stemmer=True,
-            use_aggregator=True,
-        )
+    compute_rouge(
+        decoded_preds, decoded_labels, prediction_lens, bleu_rouge_score
+    )
 
-        result_rouge["gen_len"] = np.mean(prediction_lens)
+    compute_blue(
+        decoded_preds, decoded_labels, prediction_lens, bleu_rouge_score
+    )
 
-        bleu_rouge_score["rouge1"] = result_rouge["rouge1"]
-        bleu_rouge_score["rouge2"] = result_rouge["rouge2"]
-        bleu_rouge_score["rougeL"] = result_rouge["rougeL"]
-        bleu_rouge_score["rougeLsum"] = result_rouge["rougeLsum"]
+    compute_bert_score(decoded_preds, decoded_labels, bleu_rouge_score)
 
-    if bleu:
-        metric_bleu = evaluate.load("bleu")
-        result_bleu = metric_bleu.compute(
-            predictions=decoded_preds, references=decoded_labels
-        )
-        result_bleu["gen_len"] = np.mean(prediction_lens)
-
-        bleu_rouge_score["bleu"] = result_bleu["bleu"]
+    compute_meteor(decoded_preds, decoded_labels, bleu_rouge_score)
 
     # Add mean generated length
     return bleu_rouge_score

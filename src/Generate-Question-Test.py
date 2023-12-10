@@ -1,26 +1,36 @@
 """Test and Evaluate Seq2Seq Language Model."""
 
+import argparse
+import json
+import logging
+import os
+import typing
+
+import evaluate  # type: ignore
+import nltk  # type: ignore
+import numpy as np
+import torch
 from transformers import (  # type: ignore
-    AutoTokenizer,
     AutoModelForSeq2SeqLM,
+    AutoTokenizer,
+    BloomForCausalLM,
+    BloomTokenizerFast,
     EvalPrediction,
     Seq2SeqTrainer,
     Seq2SeqTrainingArguments,
-    BloomForCausalLM,
-    BloomTokenizerFast,
     T5TokenizerFast,
 )
-import argparse
-import os
-import logging
-import typing
-import numpy as np
-import nltk  # type: ignore
-import evaluate  # type: ignore
-import torch
-import json
+
 from src.Load_Data import load_datasets
-from src.util import get_wandb_tags, read_config_file, init_args
+from src.util import (
+    compute_bert_score,
+    compute_blue,
+    compute_meteor,
+    compute_rouge,
+    get_wandb_tags,
+    init_args,
+    read_config_file,
+)
 
 logging.basicConfig(
     format="%(asctime)s %(levelname)-4s [%(name)s:%(lineno)d] - %(message)s",
@@ -136,32 +146,17 @@ def compute_metrics(eval_pred: EvalPrediction) -> typing.Dict[str, float]:
     ]
     bleu_rouge_score = {}
 
-    if rouge:
-        metric_rouge = evaluate.load("rouge")
-        result_rouge = metric_rouge.compute(
-            predictions=decoded_preds,
-            references=decoded_labels,
-            use_stemmer=True,
-            use_aggregator=True,
-        )
+    compute_rouge(
+        decoded_preds, decoded_labels, prediction_lens, bleu_rouge_score
+    )
 
-        result_rouge["gen_len"] = np.mean(prediction_lens)
+    compute_blue(
+        decoded_preds, decoded_labels, prediction_lens, bleu_rouge_score
+    )
 
-        bleu_rouge_score["rouge1"] = result_rouge["rouge1"]
-        bleu_rouge_score["rouge2"] = result_rouge["rouge2"]
-        bleu_rouge_score["rougeL"] = result_rouge["rougeL"]
-        bleu_rouge_score["rougeLsum"] = result_rouge["rougeLsum"]
+    compute_bert_score(decoded_preds, decoded_labels, bleu_rouge_score)
 
-    if bleu:
-        metric_bleu = evaluate.load("bleu")
-        result_bleu = metric_bleu.compute(
-            predictions=decoded_preds, references=decoded_labels
-        )
-        result_bleu["gen_len"] = np.mean(prediction_lens)
-
-        bleu_rouge_score["bleu"] = result_bleu["bleu"]
-
-    # Add mean generated length
+    compute_meteor(decoded_preds, decoded_labels, bleu_rouge_score)
     return bleu_rouge_score
 
 
@@ -181,9 +176,7 @@ def preprocess_data(
     Returns:
         Tokenizes the data (parameter).
     """
-    inputs = [
-        pre + ": " + inp for inp, pre in zip(data["input_text"], data["prefix"])
-    ]
+    inputs = [inp for inp, pre in zip(data["input_text"])]
 
     # model_inputs = tokenizer(
     #     inputs, max_length=max_input_length, truncation=True
@@ -316,13 +309,7 @@ if __name__ == "__main__":
     #              (q+enter to quit)"
     # )
 
-    # eval(
-    #     config["data"],
-    #     model,
-    #     tokenizer,
-    #     args,
-    #     model_path
-    # )
+    eval(config["data"], model, tokenizer, args, model_path)
     print("Enter a claim:")
     while True:
         inp = input()
