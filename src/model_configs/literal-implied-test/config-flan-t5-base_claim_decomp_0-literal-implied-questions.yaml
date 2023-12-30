@@ -1,5 +1,4 @@
-train_data: data/gpt_generated
-test_data: [data/literal-implied-questions]
+data: data/literal-implied-questions
 hyper parameters:
   evaluation_strategy: epoch
   fp16: true

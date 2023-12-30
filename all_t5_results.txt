@@ -1,0 +1,280 @@
+src/model_configs/config-t5-base-all_claim_decomp.yaml
+2023-11-17 08:43:22 INFO [__main__:72] - Using directory models/t5-base_all_0/checkpoint-41672 for testing
+2023-11-17 08:43:27 INFO [__main__:370] - type a claim to see how the model responds                  (q+enter to quit)
+2023-11-17 08:43:27 WARNING [datasets.builder:816] - Found cached dataset json (/home/ritvik/.cache/huggingface/datasets/json/default-990326b0491caaa8/0.0.0/e347ab1c932092252e717ff3f949105a4dd28b27e842dd53157d2f72e276c2e4)
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00, 775.57it/s]
+2023-11-17 08:43:27 WARNING [datasets.arrow_dataset:3062] - Loading cached processed dataset at /home/ritvik/.cache/huggingface/datasets/json/default-990326b0491caaa8/0.0.0/e347ab1c932092252e717ff3f949105a4dd28b27e842dd53157d2f72e276c2e4/cache-26e5245dc51a3cce.arrow
+You're using a T5TokenizerFast tokenizer. Please note that with a fast tokenizer, using the `__call__` method is faster than using a method to encode the text followed by a call to the `pad` method to get a padded encoding.
+/home/ritvik/conda/envs/simpletransformers/lib/python3.9/site-packages/torch/nn/parallel/_functions.py:68: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
+  warnings.warn('Was asked to gather along dimension 0, but all '
+  0%|          | 0/2 [00:00<?, ?it/s]100%|██████████| 2/2 [00:04<00:00,  2.04s/it]2023-11-17 08:43:46 INFO [absl:83] - Using default tokenizer.
+wandb: Currently logged in as: rawpower9 (factiverse-ai). Use `wandb login --relogin` to force relogin
+wandb: wandb version 0.16.0 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.15.3
+wandb: Run data is saved locally in /home/ritvik/questgen/wandb/run-20231117_084348-rmdqdvnc
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run denim-night-85
+wandb: ⭐️ View project at https://wandb.ai/factiverse-ai/huggingface
+wandb: 🚀 View run at https://wandb.ai/factiverse-ai/huggingface/runs/rmdqdvnc
+100%|██████████| 2/2 [00:12<00:00,  6.28s/it]
+/home/ritvik/conda/envs/simpletransformers/lib/python3.9/site-packages/transformers/generation/utils.py:1353: UserWarning: Using `max_length`'s default (20) to control the generation length. This behaviour is deprecated and will be removed from the config in v5 of Transformers -- we recommend using `max_new_tokens` to control the maximum length of the generation.
+  warnings.warn(
+2023-11-17 08:44:15 INFO [__main__:332] - Metric results: {'eval_loss': 23.838085174560547, 'eval_rouge1': 0.8112380718646072, 'eval_rouge2': 0.7110073523834368, 'eval_rougeL': 0.7845829920573408, 'eval_rougeLsum': 0.7843397088720162, 'eval_bleu': 0.6332500448762127, 'eval_runtime': 19.2097, 'eval_samples_per_second': 5.622, 'eval_steps_per_second': 0.104}
+wandb: Waiting for W&B process to finish... (success).
+wandb: - 0.002 MB of 0.023 MB uploaded (0.000 MB deduped)wandb: \ 0.023 MB of 0.023 MB uploaded (0.000 MB deduped)wandb: 
+wandb: Run history:
+wandb:               eval/bleu ▁
+wandb:               eval/loss ▁
+wandb:             eval/rouge1 ▁
+wandb:             eval/rouge2 ▁
+wandb:             eval/rougeL ▁
+wandb:          eval/rougeLsum ▁
+wandb:            eval/runtime ▁
+wandb: eval/samples_per_second ▁
+wandb:   eval/steps_per_second ▁
+wandb:       train/global_step ▁
+wandb: 
+wandb: Run summary:
+wandb:               eval/bleu 0.63325
+wandb:               eval/loss 23.83809
+wandb:             eval/rouge1 0.81124
+wandb:             eval/rouge2 0.71101
+wandb:             eval/rougeL 0.78458
+wandb:          eval/rougeLsum 0.78434
+wandb:            eval/runtime 19.2097
+wandb: eval/samples_per_second 5.622
+wandb:   eval/steps_per_second 0.104
+wandb:       train/global_step 0
+wandb: 
+wandb: 🚀 View run denim-night-85 at: https://wandb.ai/factiverse-ai/huggingface/runs/rmdqdvnc
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20231117_084348-rmdqdvnc/logs
+src/model_configs/config-t5-base-all_fact_checking_briefs.yaml
+2023-11-17 08:44:25 INFO [__main__:72] - Using directory models/t5-base_all_0/checkpoint-41672 for testing
+2023-11-17 08:44:30 INFO [__main__:370] - type a claim to see how the model responds                  (q+enter to quit)
+2023-11-17 08:44:30 WARNING [datasets.builder:816] - Found cached dataset json (/home/ritvik/.cache/huggingface/datasets/json/default-7550d3928950918d/0.0.0/e347ab1c932092252e717ff3f949105a4dd28b27e842dd53157d2f72e276c2e4)
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00, 775.57it/s]
+Map:   0%|          | 0/145 [00:00<?, ? examples/s]Map: 100%|██████████| 145/145 [00:00<00:00, 1288.17 examples/s]                                                               You're using a T5TokenizerFast tokenizer. Please note that with a fast tokenizer, using the `__call__` method is faster than using a method to encode the text followed by a call to the `pad` method to get a padded encoding.
+/home/ritvik/conda/envs/simpletransformers/lib/python3.9/site-packages/torch/nn/parallel/_functions.py:68: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
+  warnings.warn('Was asked to gather along dimension 0, but all '
+  0%|          | 0/3 [00:00<?, ?it/s] 67%|██████▋   | 2/3 [00:05<00:02,  2.90s/it]100%|██████████| 3/3 [00:07<00:00,  2.44s/it]2023-11-17 08:44:52 INFO [absl:83] - Using default tokenizer.
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+wandb: Currently logged in as: rawpower9 (factiverse-ai). Use `wandb login --relogin` to force relogin
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+wandb: wandb version 0.16.0 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.15.3
+wandb: Run data is saved locally in /home/ritvik/questgen/wandb/run-20231117_084455-v2an3znu
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run confused-water-86
+wandb: ⭐️ View project at https://wandb.ai/factiverse-ai/huggingface
+wandb: 🚀 View run at https://wandb.ai/factiverse-ai/huggingface/runs/v2an3znu
+100%|██████████| 3/3 [00:16<00:00,  5.53s/it]
+/home/ritvik/conda/envs/simpletransformers/lib/python3.9/site-packages/transformers/generation/utils.py:1353: UserWarning: Using `max_length`'s default (20) to control the generation length. This behaviour is deprecated and will be removed from the config in v5 of Transformers -- we recommend using `max_new_tokens` to control the maximum length of the generation.
+  warnings.warn(
+2023-11-17 08:45:30 INFO [__main__:332] - Metric results: {'eval_loss': 22.01308250427246, 'eval_rouge1': 0.3224454721490616, 'eval_rouge2': 0.11660065045796912, 'eval_rougeL': 0.2899706940329796, 'eval_rougeLsum': 0.2895069925903709, 'eval_bleu': 0.07602692434987163, 'eval_runtime': 22.7671, 'eval_samples_per_second': 6.369, 'eval_steps_per_second': 0.132}
+wandb: Waiting for W&B process to finish... (success).
+wandb: - 0.002 MB of 0.002 MB uploaded (0.000 MB deduped)wandb: \ 0.023 MB of 0.023 MB uploaded (0.000 MB deduped)wandb: 
+wandb: Run history:
+wandb:               eval/bleu ▁
+wandb:               eval/loss ▁
+wandb:             eval/rouge1 ▁
+wandb:             eval/rouge2 ▁
+wandb:             eval/rougeL ▁
+wandb:          eval/rougeLsum ▁
+wandb:            eval/runtime ▁
+wandb: eval/samples_per_second ▁
+wandb:   eval/steps_per_second ▁
+wandb:       train/global_step ▁
+wandb: 
+wandb: Run summary:
+wandb:               eval/bleu 0.07603
+wandb:               eval/loss 22.01308
+wandb:             eval/rouge1 0.32245
+wandb:             eval/rouge2 0.1166
+wandb:             eval/rougeL 0.28997
+wandb:          eval/rougeLsum 0.28951
+wandb:            eval/runtime 22.7671
+wandb: eval/samples_per_second 6.369
+wandb:   eval/steps_per_second 0.132
+wandb:       train/global_step 0
+wandb: 
+wandb: 🚀 View run confused-water-86 at: https://wandb.ai/factiverse-ai/huggingface/runs/v2an3znu
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20231117_084455-v2an3znu/logs
+src/model_configs/config-t5-base-all_gpt_generated.yaml
+2023-11-17 08:45:40 INFO [__main__:72] - Using directory models/t5-base_all_0/checkpoint-41672 for testing
+2023-11-17 08:45:45 INFO [__main__:370] - type a claim to see how the model responds                  (q+enter to quit)
+2023-11-17 08:45:45 WARNING [datasets.builder:816] - Found cached dataset json (/home/ritvik/.cache/huggingface/datasets/json/default-827ab733db3a05b1/0.0.0/e347ab1c932092252e717ff3f949105a4dd28b27e842dd53157d2f72e276c2e4)
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:00<00:00, 685.23it/s]
+Map:   0%|          | 0/3817 [00:00<?, ? examples/s]Map:  26%|██▌       | 1000/3817 [00:00<00:01, 1440.43 examples/s]Map:  52%|█████▏    | 2000/3817 [00:01<00:01, 1767.31 examples/s]Map:  79%|███████▊  | 3000/3817 [00:01<00:00, 1920.31 examples/s]Map: 100%|██████████| 3817/3817 [00:02<00:00, 1955.23 examples/s]                                                                 You're using a T5TokenizerFast tokenizer. Please note that with a fast tokenizer, using the `__call__` method is faster than using a method to encode the text followed by a call to the `pad` method to get a padded encoding.
+/home/ritvik/conda/envs/simpletransformers/lib/python3.9/site-packages/torch/nn/parallel/_functions.py:68: UserWarning: Was asked to gather along dimension 0, but all input tensors were scalars; will instead unsqueeze and return a vector.
+  warnings.warn('Was asked to gather along dimension 0, but all '
+  0%|          | 0/60 [00:00<?, ?it/s]  3%|▎         | 2/60 [00:05<02:51,  2.96s/it]  5%|▌         | 3/60 [00:11<03:59,  4.21s/it]  7%|▋         | 4/60 [00:17<04:33,  4.88s/it]  8%|▊         | 5/60 [00:23<04:51,  5.30s/it] 10%|█         | 6/60 [00:30<05:01,  5.58s/it] 12%|█▏        | 7/60 [00:36<05:07,  5.80s/it] 13%|█▎        | 8/60 [00:42<05:10,  5.97s/it] 15%|█▌        | 9/60 [00:49<05:11,  6.12s/it] 17%|█▋        | 10/60 [00:55<05:12,  6.26s/it] 18%|█▊        | 11/60 [01:02<05:09,  6.32s/it] 20%|██        | 12/60 [01:08<05:03,  6.33s/it] 22%|██▏       | 13/60 [01:14<04:56,  6.31s/it] 23%|██▎       | 14/60 [01:21<04:49,  6.29s/it] 25%|██▌       | 15/60 [01:27<04:41,  6.25s/it] 27%|██▋       | 16/60 [01:33<04:33,  6.22s/it] 28%|██▊       | 17/60 [01:39<04:27,  6.21s/it] 30%|███       | 18/60 [01:45<04:20,  6.21s/it] 32%|███▏      | 19/60 [01:51<04:14,  6.21s/it] 33%|███▎      | 20/60 [01:58<04:09,  6.25s/it] 35%|███▌      | 21/60 [02:04<04:04,  6.27s/it] 37%|███▋      | 22/60 [02:10<03:58,  6.28s/it] 38%|███▊      | 23/60 [02:17<03:52,  6.29s/it] 40%|████      | 24/60 [02:23<03:46,  6.30s/it] 42%|████▏     | 25/60 [02:29<03:40,  6.30s/it] 43%|████▎     | 26/60 [02:36<03:33,  6.29s/it] 45%|████▌     | 27/60 [02:42<03:27,  6.28s/it] 47%|████▋     | 28/60 [02:48<03:20,  6.27s/it] 48%|████▊     | 29/60 [02:54<03:13,  6.26s/it] 50%|█████     | 30/60 [03:01<03:08,  6.27s/it] 52%|█████▏    | 31/60 [03:07<03:01,  6.26s/it] 53%|█████▎    | 32/60 [03:13<02:55,  6.25s/it] 55%|█████▌    | 33/60 [03:19<02:48,  6.25s/it] 57%|█████▋    | 34/60 [03:26<02:42,  6.26s/it] 58%|█████▊    | 35/60 [03:32<02:36,  6.26s/it] 60%|██████    | 36/60 [03:38<02:30,  6.26s/it] 62%|██████▏   | 37/60 [03:44<02:24,  6.27s/it] 63%|██████▎   | 38/60 [03:51<02:17,  6.27s/it] 65%|██████▌   | 39/60 [03:57<02:11,  6.28s/it] 67%|██████▋   | 40/60 [04:03<02:05,  6.28s/it] 68%|██████▊   | 41/60 [04:10<01:59,  6.28s/it] 70%|███████   | 42/60 [04:16<01:53,  6.31s/it] 72%|███████▏  | 43/60 [04:22<01:47,  6.30s/it] 73%|███████▎  | 44/60 [04:29<01:40,  6.29s/it] 75%|███████▌  | 45/60 [04:35<01:34,  6.29s/it] 77%|███████▋  | 46/60 [04:41<01:27,  6.28s/it] 78%|███████▊  | 47/60 [04:47<01:21,  6.27s/it] 80%|████████  | 48/60 [04:54<01:15,  6.26s/it] 82%|████████▏ | 49/60 [05:00<01:08,  6.26s/it] 83%|████████▎ | 50/60 [05:06<01:02,  6.28s/it] 85%|████████▌ | 51/60 [05:12<00:56,  6.27s/it] 87%|████████▋ | 52/60 [05:19<00:50,  6.26s/it] 88%|████████▊ | 53/60 [05:25<00:43,  6.26s/it] 90%|█████████ | 54/60 [05:31<00:37,  6.26s/it] 92%|█████████▏| 55/60 [05:37<00:31,  6.26s/it] 93%|█████████▎| 56/60 [05:44<00:25,  6.26s/it] 95%|█████████▌| 57/60 [05:50<00:18,  6.26s/it] 97%|█████████▋| 58/60 [05:56<00:12,  6.26s/it] 98%|█████████▊| 59/60 [06:03<00:06,  6.27s/it]100%|██████████| 60/60 [06:07<00:00,  5.68s/it]2023-11-17 08:52:09 INFO [absl:83] - Using default tokenizer.
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+wandb: Currently logged in as: rawpower9 (factiverse-ai). Use `wandb login --relogin` to force relogin
+huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+wandb: wandb version 0.16.0 is available!  To upgrade, please run:
+wandb:  $ pip install wandb --upgrade
+wandb: Tracking run with wandb version 0.15.3
+wandb: Run data is saved locally in /home/ritvik/questgen/wandb/run-20231117_085215-f76mz0hp
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run amber-dust-87
+wandb: ⭐️ View project at https://wandb.ai/factiverse-ai/huggingface
+wandb: 🚀 View run at https://wandb.ai/factiverse-ai/huggingface/runs/f76mz0hp
+100%|██████████| 60/60 [06:19<00:00,  6.33s/it]
+/home/ritvik/conda/envs/simpletransformers/lib/python3.9/site-packages/transformers/generation/utils.py:1353: UserWarning: Using `max_length`'s default (20) to control the generation length. This behaviour is deprecated and will be removed from the config in v5 of Transformers -- we recommend using `max_new_tokens` to control the maximum length of the generation.
+  warnings.warn(
+2023-11-17 09:04:56 INFO [__main__:332] - Metric results: {'eval_loss': 21.598352432250977, 'eval_rouge1': 0.4384017038045116, 'eval_rouge2': 0.22233067829248093, 'eval_rougeL': 0.39414469811285324, 'eval_rougeLsum': 0.39445789163947204, 'eval_bleu': 0.12043661030354871, 'eval_runtime': 386.5538, 'eval_samples_per_second': 9.874, 'eval_steps_per_second': 0.155}
+wandb: Waiting for W&B process to finish... (success).
+wandb: 
+wandb: Run history:
+wandb:               eval/bleu ▁
+wandb:               eval/loss ▁
+wandb:             eval/rouge1 ▁
+wandb:             eval/rouge2 ▁
+wandb:             eval/rougeL ▁
+wandb:          eval/rougeLsum ▁
+wandb:            eval/runtime ▁
+wandb: eval/samples_per_second ▁
+wandb:   eval/steps_per_second ▁
+wandb:       train/global_step ▁
+wandb: 
+wandb: Run summary:
+wandb:               eval/bleu 0.12044
+wandb:               eval/loss 21.59835
+wandb:             eval/rouge1 0.4384
+wandb:             eval/rouge2 0.22233
+wandb:             eval/rougeL 0.39414
+wandb:          eval/rougeLsum 0.39446
+wandb:            eval/runtime 386.5538
+wandb: eval/samples_per_second 9.874
+wandb:   eval/steps_per_second 0.155
+wandb:       train/global_step 0
+wandb: 
+wandb: 🚀 View run amber-dust-87 at: https://wandb.ai/factiverse-ai/huggingface/runs/f76mz0hp
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20231117_085215-f76mz0hp/logs
+src/model_configs/config-t5-base-all_faviq_r_set.yaml
+╭─────────────────────────────── Traceback (most recent call last) ────────────────────────────────╮
+│ /home/ritvik/conda/envs/simpletransformers/lib/python3.9/runpy.py:197 in _run_module_as_main     │
+│                                                                                                  │
+│   194 │   main_globals = sys.modules["__main__"].__dict__                                        │
+│   195 │   if alter_argv:                                                                         │
+│   196 │   │   sys.argv[0] = mod_spec.origin                                                      │
+│ ❱ 197 │   return _run_code(code, main_globals, None,                                             │
+│   198 │   │   │   │   │    "__main__", mod_spec)                                                 │
+│   199                                                                                            │
+│   200 def run_module(mod_name, init_globals=None,                                                │
+│                                                                                                  │
+│ /home/ritvik/conda/envs/simpletransformers/lib/python3.9/runpy.py:87 in _run_code                │
+│                                                                                                  │
+│    84 │   │   │   │   │      __loader__ = loader,                                                │
+│    85 │   │   │   │   │      __package__ = pkg_name,                                             │
+│    86 │   │   │   │   │      __spec__ = mod_spec)                                                │
+│ ❱  87 │   exec(code, run_globals)                                                                │
+│    88 │   return run_globals                                                                     │
+│    89                                                                                            │
+│    90 def _run_module_code(code, init_globals=None,                                              │
+│                                                                                                  │
+│ /home/ritvik/questgen/src/Generate-Question-test.py:353 in <module>                              │
+│                                                                                                  │
+│   350 │                                                                                          │
+│   351 │   options = vars(args)                                                                   │
+│   352 │                                                                                          │
+│ ❱ 353 │   config = read_config_file(options["config"])                                           │
+│   354 │   metrics = config["metrics"]                                                            │
+│   355 │                                                                                          │
+│   356 │   model_checkpoint = get_model_checkpoint_path(config)                                   │
+│                                                                                                  │
+│ /home/ritvik/questgen/src/Generate-Question-test.py:41 in read_config_file                       │
+│                                                                                                  │
+│    38 │   Returns:                                                                               │
+│    39 │   │   the contents of the YAML file                                                      │
+│    40 │   """                                                                                    │
+│ ❱  41 │   with open(file_name, "r") as file:                                                     │
+│    42 │   │   config = yaml.safe_load(file)                                                      │
+│    43 │   return config                                                                          │
+│    44                                                                                            │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
+FileNotFoundError: [Errno 2] No such file or directory: 'src/model_configs/config-t5-base-all_faviq_r_set.yaml'
+src/model_configs/config-t5-base-all_faviq_a_set.yaml
+╭─────────────────────────────── Traceback (most recent call last) ────────────────────────────────╮
+│ /home/ritvik/conda/envs/simpletransformers/lib/python3.9/runpy.py:197 in _run_module_as_main     │
+│                                                                                                  │
+│   194 │   main_globals = sys.modules["__main__"].__dict__                                        │
+│   195 │   if alter_argv:                                                                         │
+│   196 │   │   sys.argv[0] = mod_spec.origin                                                      │
+│ ❱ 197 │   return _run_code(code, main_globals, None,                                             │
+│   198 │   │   │   │   │    "__main__", mod_spec)                                                 │
+│   199                                                                                            │
+│   200 def run_module(mod_name, init_globals=None,                                                │
+│                                                                                                  │
+│ /home/ritvik/conda/envs/simpletransformers/lib/python3.9/runpy.py:87 in _run_code                │
+│                                                                                                  │
+│    84 │   │   │   │   │      __loader__ = loader,                                                │
+│    85 │   │   │   │   │      __package__ = pkg_name,                                             │
+│    86 │   │   │   │   │      __spec__ = mod_spec)                                                │
+│ ❱  87 │   exec(code, run_globals)                                                                │
+│    88 │   return run_globals                                                                     │
+│    89                                                                                            │
+│    90 def _run_module_code(code, init_globals=None,                                              │
+│                                                                                                  │
+│ /home/ritvik/questgen/src/Generate-Question-test.py:353 in <module>                              │
+│                                                                                                  │
+│   350 │                                                                                          │
+│   351 │   options = vars(args)                                                                   │
+│   352 │                                                                                          │
+│ ❱ 353 │   config = read_config_file(options["config"])                                           │
+│   354 │   metrics = config["metrics"]                                                            │
+│   355 │                                                                                          │
+│   356 │   model_checkpoint = get_model_checkpoint_path(config)                                   │
+│                                                                                                  │
+│ /home/ritvik/questgen/src/Generate-Question-test.py:41 in read_config_file                       │
+│                                                                                                  │
+│    38 │   Returns:                                                                               │
+│    39 │   │   the contents of the YAML file                                                      │
+│    40 │   """                                                                                    │
+│ ❱  41 │   with open(file_name, "r") as file:                                                     │
+│    42 │   │   config = yaml.safe_load(file)                                                      │
+│    43 │   return config                                                                          │
+│    44                                                                                            │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
+FileNotFoundError: [Errno 2] No such file or directory: 'src/model_configs/config-t5-base-all_faviq_a_set.yaml'

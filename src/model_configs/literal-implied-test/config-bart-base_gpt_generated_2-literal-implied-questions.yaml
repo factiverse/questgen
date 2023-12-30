@@ -1,5 +1,4 @@
-train_data: data/gpt_generated
-test_data: [data/literal-implied-questions]
+data: data/literal-implied-questions
 hyper parameters:
   evaluation_strategy: epoch
   fp16: true
@@ -14,7 +13,7 @@ hyper parameters:
 metrics:
   bleu: true
   rouge: true
-model_checkpoint: models/flan-t5-base_claim_decomp_0
+model_checkpoint: models/bart-base_gpt_generated_2
 output_dir: models/
 wandb_tags:
 - query generation

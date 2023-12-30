@@ -1,5 +1,4 @@
-train_data: data/gpt_generated
-test_data: [data/literal-implied-questions]
+data: data/AVeriTeC
 hyper parameters:
   evaluation_strategy: epoch
   fp16: true
@@ -14,8 +13,11 @@ hyper parameters:
 metrics:
   bleu: true
   rouge: true
-model_checkpoint: models/flan-t5-base_claim_decomp_0
+model_checkpoint: t5-base
 output_dir: models/
+test_data:
+- data/literal-implied-questions
+train_data: data/gpt_generated
 wandb_tags:
 - query generation
 - question generation
