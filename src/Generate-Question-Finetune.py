@@ -26,8 +26,12 @@ from transformers import (  # type: ignore
     T5TokenizerFast,
 )
 
-from Load_Data import load_data, load_datasets
-from util import init_args, read_config_file, get_wandb_tags
+from Load_Data import load_data, load_datasets  # type: ignore
+from util import (  # type: ignore
+    init_args,
+    read_config_file,
+    get_wandb_tags_finetune,
+)
 
 logging.basicConfig(
     format="%(asctime)s %(levelname)-4s [%(name)s:%(lineno)d] - %(message)s",
@@ -196,7 +200,7 @@ if __name__ == "__main__":
     config = read_config_file(options["config"])
     metrics = config["metrics"]
     # model_checkpoint = config["model_checkpoint"]
-    wandb_dataset_tags, dataset_name = get_wandb_tags(config)
+    wandb_dataset_tags, dataset_name = get_wandb_tags_finetune(config)
     wandb_tags = [
         "query generation",
         "question generation",
@@ -219,10 +223,10 @@ if __name__ == "__main__":
         model = AutoModelForSeq2SeqLM.from_pretrained(
             config["model_checkpoint"]
         )
-    if isinstance(config["data"], list):
-        raw_dataset = load_datasets(config["data"])
+    if isinstance(config["train_data"], list):
+        raw_dataset = load_datasets(config["train_data"])
     else:
-        raw_dataset = load_data(config["data"])
+        raw_dataset = load_data(config["train_data"])
 
     # tokenized_datasets = raw_dataset.map(preprocess_data, batched=True)
     tokenized_datasets = raw_dataset.map(
@@ -249,6 +253,7 @@ if __name__ == "__main__":
         * config["hyper parameters"]["num_train_epochs"]
         // batch_size
     )
+    print("*******************************************", steps_per_epoch, "*****************************")
     args = init_args(
         config["hyper parameters"],
         model_out_dir,

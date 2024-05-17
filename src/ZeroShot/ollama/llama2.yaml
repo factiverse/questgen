@@ -1,0 +1,12 @@
+model: "llama2"
+stream: false
+options:
+  seed: 42
+  num_predict: 300
+  top_k: 40
+  top_p: 0.9
+  tfs_z: 1
+  repeat_last_n: 64
+  temperature: 0.8
+  repeat_penalty: 1.1
+  penalize_newline: false 

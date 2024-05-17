@@ -24,7 +24,7 @@ cucumber-report.json
 port.txt
 precommit.hook
 pythonFiles/lib/**
-debug_coverage*/**
+debug_coverage*/*
 languageServer/**
 languageServer.*/**
 bin/**
@@ -50,3 +50,4 @@ bad-datasets/
 bad-models/
 data/*
 models_old/*
+src/model_configs/*

@@ -55,7 +55,9 @@ def load_datasets(dataset_paths: typing.List[str]) -> datasets.DatasetDict:
     merged_test_datasets = []
     for data in dataset_paths:
         loaded_dataset = load_data(data)
+        # if "train" in loaded_dataset:
         merged_train_datasets.append(loaded_dataset["train"])
+        # if "test" in loaded_dataset:
         merged_test_datasets.append(loaded_dataset["test"])
     merged_train_dataset = datasets.concatenate_datasets(merged_train_datasets)
     merged_test_dataset = datasets.concatenate_datasets(merged_test_datasets)
