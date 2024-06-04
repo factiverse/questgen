@@ -69,9 +69,6 @@ def generate_sequences(
 
 if __name__ == "__main__":
     device = "cuda" if torch.cuda.is_available() else "cpu"
-
-    # model_path = "models/bart-large_claim_decomp_fact_checking_briefs_faviq_a_set_faviq_r_set_gpt_generated_4/checkpoint-52090"
-    # model_path = "Factiverse/bart-large-claimdecomp"
     model_path = "models/bart-base_all_0/checkpoint-20836"
     model = AutoModelForSeq2SeqLM.from_pretrained(model_path)
     model.to(device)
