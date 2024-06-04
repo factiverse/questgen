@@ -1,5 +1,4 @@
 """Using One Shot on a LLM."""
-import requests  # type: ignore
 import json
 import typing
 import nltk  # type: ignore
