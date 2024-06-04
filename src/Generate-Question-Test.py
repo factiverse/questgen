@@ -257,10 +257,6 @@ def preprocess_data(
         pre + ": " + inp for inp, pre in zip(data["input_text"], data["prefix"])
     ]
 
-    # model_inputs = tokenizer(
-    #     inputs, max_length=max_input_length, truncation=True
-    # )
-
     model_inputs = tokenizer.batch_encode_plus(
         inputs,
         max_length=max_input_length,
@@ -268,12 +264,6 @@ def preprocess_data(
         padding="max_length",
         return_tensors="pt",
     )
-
-    # labels = tokenizer(
-    #     text_target=data["target_text"],
-    #     max_length=max_target_length,
-    #     truncation=True,
-    # )
 
     labels = tokenizer.batch_encode_plus(
         data["target_text"],
@@ -349,13 +339,6 @@ def eval(
             {"pred": pred, "label": target, "input": inp, "metrics": metrics}
         )
 
-
-    # for inp in raw_dataset["test"]:
-    #     pred = predict(inp['input_text'], model, tokenizer, 3)
-    #     pred = [p.strip() for p in pred]       
-    #     preds.append(
-    #         {"pred": pred, "input": inp}
-    #     )
     all_res = [preds,
                results]
 
@@ -395,11 +378,6 @@ if __name__ == "__main__":
         output_dir,
     )
     wandb_dataset_tags, dataset_name = get_wandb_tags_test(config)
-    # wandb.init(
-    #     tags=wandb_dataset_tags,
-    #     project="question generation evaluation",
-    # )
-    # wandb.config.update(args.to_dict())
 
     if "model_checkpoint" in config:
         model_checkpoint = get_latest_checkpoint_path(config)
@@ -420,38 +398,3 @@ if __name__ == "__main__":
     model.to(device)
 
     eval(config["test_data"], model, tokenizer, args, model_path)
-
-    # logger.info(
-    #     "type a claim to see how the model responds \
-    #              (q+enter to quit)"
-    # )
-    # while True:
-    #     inp = input()
-    #     if inp == "q":
-    #         break
-    #     input_ids = tokenizer(inp, return_tensors="pt").to(device)
-    #     print(input_ids["input_ids"])
-    #     # outputs = model.generate(input_ids["input_ids"], max_new_tokens=512,
-    #     #     do_sample=False,
-    #     #     top_k=50,
-    #     #     top_p=0.95,
-    #     #     num_return_sequences=3,
-    #     #     repetition_penalty=1.2,
-    #     #     temperature=1.5,
-    #     #     epsilon_cutoff=3e-4,
-    #     #     diversity_penalty=1.99,
-    #     #     num_beam_groups=3,
-    #     #     num_beams=9
-    #     #     )
-    #     outputs = model.generate(
-    #         input_ids["input_ids"],
-    #         num_beams=5,
-    #         num_beam_groups=5,
-    #         max_new_tokens=30,
-    #         diversity_penalty=1.0,
-    #         num_return_sequences=3,
-    #     )
-    #     for i in range(outputs.shape[0]):
-    #         print(f"Output {i+1}:")
-    #  output_text = tokenizer.decode(outputs[i],skip_special_tokens=True)
-    #         print(output_text)

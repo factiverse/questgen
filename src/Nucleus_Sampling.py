@@ -113,5 +113,3 @@ if __name__ == "__main__":
             )
         print(f"Time taken: {time_taken} seconds")
         print("Output:\n" + 100 * "-")
-# generate question: Right now in Ohio 200 000 people are getting opioid treatment because they have insurance under the Affordable Care Act.
-# generate question: Rep. Paul Gosar asks Capitol Police to arrest illegal immigrants attending State of the Union.
