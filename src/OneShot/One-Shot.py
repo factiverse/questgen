@@ -8,6 +8,7 @@ from rouge_score.rouge_scorer import RougeScorer  # type: ignore
 import argparse
 import logging
 from src.OneShot.ollama.ollama_gen import Ollama
+from openai_request import OpenAIUtils
 
 logging.basicConfig(
     format="%(asctime)s %(levelname)-4s [%(name)s:%(lineno)d] - %(message)s",
@@ -18,13 +19,13 @@ logger = logging.getLogger(__name__)
 
 
 def generate_question_from_llm(
-    claim: str, ollama: Ollama, num_question: int
+    claim: str, model: Ollama | OpenAIUtils, num_question: int
 ) -> typing.Dict:
     """Sends a request to a LLM to generate a question for a claim.
 
     Args:
         claim: The claim the model will generate a question for
-        ollama: The Ollama object to generate from
+        model: The Ollama object to generate from
         example: The example that the LLM should try to match for One-Shot.
     """
 
@@ -56,7 +57,7 @@ def generate_question_from_llm(
     #     + "Question: "
     # )
     # print(prompt)
-    data = ollama.generate(prompt)
+    data = model.generate(prompt)
     # print(data)
     try:
         return json.loads(data)
@@ -168,7 +169,7 @@ def dictionary_cq(raw_data: typing.Dict) -> typing.Dict:
         typing.Dict: Reformat to keys = claims, values = question-set.
     """
     freq = {}
-    for example in data:
+    for example in raw_data:
         if example["input_text"] in freq:
             freq[example["input_text"]].append(example["target_text"])
         else:
@@ -180,7 +181,10 @@ if __name__ == "__main__":
     model = str(vars(args)["model"]).strip()
     config_path = "src/ZeroShot/ollama/" + model + ".yaml"
     dataset_path = str(vars(args)["dataset"]).strip()
-    ollama = Ollama(config_path)
+    if args["model"] == "gpt4o":
+        model = OpenAIUtils()
+    else:
+        model = Ollama(config_path)
     scores = []
 
     data = load_from_json("data/" + dataset_path + "/test.json")
@@ -188,7 +192,7 @@ if __name__ == "__main__":
 
     for claim,target in freq.items():
         gen_question = generate_question_from_llm(
-            claim=claim, ollama=ollama, num_question=len(target)
+            claim=claim, model=model, num_question=len(target)
         )
         gen_question = gen_question[list(gen_question.keys())[0]]
 
