@@ -1,4 +1,4 @@
-"""Zero Shot on a LLM."""
+"""Using One Shot on a LLM."""
 import requests  # type: ignore
 import json
 import typing
@@ -7,7 +7,7 @@ from nltk.tokenize import RegexpTokenizer  # type: ignore
 from rouge_score.rouge_scorer import RougeScorer  # type: ignore
 import argparse
 import logging
-from src.ZeroShot.ollama.ollama_gen import Ollama
+from src.OneShot.ollama.ollama_gen import Ollama
 
 logging.basicConfig(
     format="%(asctime)s %(levelname)-4s [%(name)s:%(lineno)d] - %(message)s",
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 def generate_question_from_llm(
-    claim: str, ollama: Ollama, example: typing.Dict, num_question: int
+    claim: str, ollama: Ollama, num_question: int
 ) -> typing.Dict:
     """Sends a request to a LLM to generate a question for a claim.
 
@@ -122,8 +122,21 @@ def load_from_json(path: str) -> typing.Dict:
         data = json.load(file)
     return data
 
+def write_results(filename: str):
+    """Write JSON results to file `filename`
 
-if __name__ == "__main__":
+    Args:
+        filename: the name of the file to write to
+    """
+    with open(filename, "w") as file:
+        json.dump(scores, file, indent=4)
+
+def arguments() -> typing.Dict:
+    """Parses code's inputs and returns the parser
+
+    Returns:
+        A dictionary of arguments
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--dataset",
@@ -141,35 +154,45 @@ if __name__ == "__main__":
         default="mistral",
     )
 
-    args = parser.parse_args()
-    model = str(vars(args)["model"]).strip()
-    # print(model)
-    config_path = "src/ZeroShot/ollama/" + model + ".yaml"
-    # print(config_path)
-    dataset_path = str(vars(args)["dataset"]).strip()
-    ollama = Ollama(config_path)
-    scores = []
+    return parser.parse_args()
 
-    data = load_from_json("data/" + dataset_path + "/test.json")
-    example = {
-        "input_text": "African American unemployment is the lowest ever recorded in our country. The Hispanic unemployment rate dropped a full point in the last year and is close to the lowest in recorded history. Dems did nothing for you but get your vote!",
-        "target_text": "Are unemployment rates for African Americans and Hispanics low today?",
-    }
+def dictionary_cq(raw_data: typing.Dict) -> typing.Dict:
+    """Reformates the input dictionary. Ensures all claims are paired
+    with their question set.
+
+
+    Args:
+        raw_data (typing.Dict): Raw data from a dataset's test file
+
+    Returns:
+        typing.Dict: Reformat to keys = claims, values = question-set.
+    """
     freq = {}
     for example in data:
         if example["input_text"] in freq:
             freq[example["input_text"]].append(example["target_text"])
         else:
             freq[example["input_text"]] = [example["target_text"]]
+    return freq
 
-    for inp,target in freq.items():
-        claim = inp
+if __name__ == "__main__":
+    args = arguments()
+    model = str(vars(args)["model"]).strip()
+    config_path = "src/ZeroShot/ollama/" + model + ".yaml"
+    dataset_path = str(vars(args)["dataset"]).strip()
+    ollama = Ollama(config_path)
+    scores = []
+
+    data = load_from_json("data/" + dataset_path + "/test.json")
+    freq = dictionary_cq(data)
+
+    for claim,target in freq.items():
         gen_question = generate_question_from_llm(
-            claim=claim, ollama=ollama, example=example, num_question=len(target)
+            claim=claim, ollama=ollama, num_question=len(target)
         )
         gen_question = gen_question[list(gen_question.keys())[0]]
-        print("before",gen_question)
 
+        #Parse dictionary for questions
         if not type(gen_question) == list:
             gen_question = [""] * len(target)
         elif len(gen_question) < len(target):
@@ -180,7 +203,6 @@ if __name__ == "__main__":
                     gen_question = [""] * len(target)
                     break
         gen_question = gen_question[:len(target)]
-        print("after",target, gen_question)
         for l in range(len(target)):
             rouge_score = rouge(target[l], gen_question[l])
             bleu_score = bleu(target[l], gen_question[l])
@@ -218,9 +240,4 @@ if __name__ == "__main__":
             "bleu": sum([s["bleu"] for s in scores]) / len(scores),
         }
     )
-
-    with open(
-        "src/ZeroShot/results/" + dataset_path + "_" + model + ".json",
-        "w",
-    ) as file:
-        json.dump(scores, file, indent=4)
+    write_results("src/ZeroShot/results/" + dataset_path + "_" + model + ".json")

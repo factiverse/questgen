@@ -1,4 +1,4 @@
-data: data/gpt_generated
+data: data/sample
 hyper parameters:
   evaluation_strategy: epoch
   fp16: true
@@ -13,7 +13,7 @@ hyper parameters:
 metrics:
   bleu: true
   rouge: true
-model_checkpoint: models/flan-t5-base_claim_decomp_0
+model_checkpoint: #Include the model filepath here `models\...`
 output_dir: models/
 wandb_tags:
 - query generation

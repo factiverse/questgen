@@ -9,7 +9,6 @@ Usage:
 
 from ollama import Client, Options
 from typing import List, Dict, Any
-import json
 import yaml
 import os
 from dotenv import load_dotenv
@@ -91,22 +90,3 @@ class Ollama:
                 question = line.split(search_string)[1].strip()
                 questions.append(question)
         return questions
-
-# prompt = (
-#     "You transform a claim into a question. "
-#     + "The question can be understood without reading the claim. "
-#     + "You generate exactly one question per claim and nothing else."
-# )
-# user_input = (
-#     "Example:\n"
-#     + f"Claim: Doctor Sally Cook is 500 years old\n"
-#     + f"Question: Is the Doctor Sally Cook 500 years old?\n\n"
-#     + "Your Response:\n"
-#     + f"Claim: The strongest man alive can lift 2 pounds\n"
-#     + "Question: "
-# )
-
-# ollama = Ollama(
-#     config_path="src/ZeroShot/ollama/llama2.yaml"
-# )
-# print(ollama.generate(prompt+user_input))
