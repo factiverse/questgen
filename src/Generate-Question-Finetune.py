@@ -253,7 +253,6 @@ if __name__ == "__main__":
         * config["hyper parameters"]["num_train_epochs"]
         // batch_size
     )
-    print("*******************************************", steps_per_epoch, "*****************************")
     args = init_args(
         config["hyper parameters"],
         model_out_dir,
