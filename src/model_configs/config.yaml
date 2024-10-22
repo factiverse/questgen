@@ -1,4 +1,5 @@
-data: data/sample
+train_data: data/sample
+test_data: data/sample
 hyper parameters:
   evaluation_strategy: epoch
   fp16: true
