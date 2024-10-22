@@ -69,3 +69,22 @@
 
 <!-- ##Usage
 Ensure that you are on a machine using CUDA.  -->
+
+## Reference (Bibtex)
+```
+@inproceedings{10.1145/3627673.3679985,
+author = {Setty, Ritvik and Setty, Vinay},
+title = {QuestGen: Effectiveness of Question Generation Methods for Fact-Checking Applications},
+year = {2024},
+isbn = {9798400704369},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3627673.3679985},
+doi = {10.1145/3627673.3679985},
+pages = {4036–4040},
+numpages = {5},
+keywords = {claim decomposition, fact-checking, question generation},
+location = {Boise, ID, USA},
+series = {CIKM '24}
+}
+```
