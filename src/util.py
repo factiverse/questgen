@@ -7,7 +7,6 @@ import yaml  # type: ignore
 from pathlib import Path
 from typing import Dict, Any, List, Tuple
 
-
 def read_config_file(file_name: str) -> Dict[str, Any]:
     """Reads YAML config from a config file.
 
@@ -50,7 +49,7 @@ def init_args(
     return args
 
 
-def get_wandb_tags(config: Dict[str, Any]) -> Tuple[List[str], str]:
+def get_wandb_tags_finetune(config: Dict[str, Any]) -> Tuple[List[str], str]:
     """Gets the tags for wandb.
 
     Args:
@@ -59,12 +58,32 @@ def get_wandb_tags(config: Dict[str, Any]) -> Tuple[List[str], str]:
     Returns:
         Tuple of wandb tags and dataset name.
     """
-    if isinstance(config["data"], list):
+    if isinstance(config["train_data"], list):
         wandb_dataset_tags = [
-            datataset.split("/")[-1] for datataset in config["data"]
+            datataset.split("/")[-1] for datataset in config["train_data"]
         ]
         dataset_name = "_".join(wandb_dataset_tags)
     else:
-        dataset_name = config["data"].split("/")[-1]
+        dataset_name = config["train_data"].split("/")[-1]
+        wandb_dataset_tags = [dataset_name]
+    return wandb_dataset_tags, dataset_name
+
+
+def get_wandb_tags_test(config: Dict[str, Any]) -> Tuple[List[str], str]:
+    """Gets the tags for wandb.
+
+    Args:
+        config: Model config.
+
+    Returns:
+        Tuple of wandb tags and dataset name.
+    """
+    if isinstance(config["test_data"], list):
+        wandb_dataset_tags = [
+            datataset.split("/")[-1] for datataset in config["test_data"]
+        ]
+        dataset_name = "_".join(wandb_dataset_tags)
+    else:
+        dataset_name = config["test_data"].split("/")[-1]
         wandb_dataset_tags = [dataset_name]
     return wandb_dataset_tags, dataset_name
