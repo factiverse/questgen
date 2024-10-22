@@ -64,7 +64,7 @@
 
 1. To **test** a model given the model configuration file, run
     
-    ```python src/Generate-Question-Test --config src/model_configs/*confile-file*```
+    ```python src/Generate-Question-Test.py --config src/model_configs/*confile-file*```
 
 
 <!-- ##Usage
