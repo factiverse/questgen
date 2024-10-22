@@ -59,11 +59,11 @@
 1. To finetune or test, make sure you first have a model_config `.yaml` file. See above to creating a model config file.
 1. To **finetune** a model given a model configuration file, run
 
-    ```python -m src.Generate-Question-Finetune --config src/model_configs/*confile-file*```
+    ```python src/Generate-Question-Finetune.py --config src/model_configs/*confile-file*```
 
 1. To **test** a model given the model configuration file, run
     
-    ```python -m src.Generate-Question-Test --config src/model_configs/*confile-file*```
+    ```python src/Generate-Question-Test --config src/model_configs/*confile-file*```
 
 
 <!-- ##Usage
