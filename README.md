@@ -33,7 +33,8 @@
 1. Fill out the following for your model. Make sure that everything in `*here*` is filled out approperiately
 
     ```
-    data: data/*data-set-name*
+    train_data: data/*data-set-name*
+    test_data: data/*data-set-name*
     hyper parameters:
     evaluation_strategy: *epoch/step*
     fp16: *true/false*
@@ -51,7 +52,7 @@
     model_checkpoint: #Include the model filepath here `models\...`
     output_dir: *models/*
     wandb_tags:
-    - *tag 1*
+    - *tag*
     ```
 1. Refer to `src/model_configs/config.yaml` for an example model configuration for the facebook/bart-base model
 
