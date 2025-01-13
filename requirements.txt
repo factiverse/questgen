@@ -23,7 +23,7 @@ PyYAML==6.0
 ruff==0.0.252
 tomli==2.0.1
 typing_extensions==4.5.0
-virtualenv==20.19.0
+virtualenv==20.26.6
 
 #Quest Gen specific reqs
 transformers>=4.30.2
